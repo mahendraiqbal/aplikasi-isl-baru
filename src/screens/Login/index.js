@@ -96,7 +96,7 @@ const LoginScreen = ({ navigation }) => {
                         }).catch((err)=> {
                             console.log("error is: " + err);
                         });
-                        navigation.navigate('BotTab');
+                        navigation.navigate('Dashboard');
                     } else {
                         // setErrortext(responseJson.message);
                         Alert.alert(
