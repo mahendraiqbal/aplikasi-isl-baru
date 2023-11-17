@@ -1,7 +1,6 @@
 {
   "expo": {
     "name": "ISL",
-    "displayname": "ISL",
     "slug": "ISL",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -26,6 +25,14 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera."
+        }
+      ]
+    ]
   }
 }

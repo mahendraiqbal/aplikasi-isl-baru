@@ -96,7 +96,7 @@ const LoginScreen = ({ navigation }) => {
                         }).catch((err)=> {
                             console.log("error is: " + err);
                         });
-                        navigation.navigate('Dashboard');
+                        navigation.replace('DrawerNavigationRoutes');
                     } else {
                         // setErrortext(responseJson.message);
                         Alert.alert(

@@ -4,7 +4,7 @@ import { View, Text, TouchableOpacity, Touchable } from "react-native";
 import { SafeAreaView } from "react-native-web";
 import { DataTable } from "react-native-paper";
 
-function showData() {
+function ShowData() {
   const navigation = useNavigation();
 
   const handleGoBack = () => {
@@ -50,4 +50,4 @@ function showData() {
   );
 }
 
-export default showData;
+export default ShowData;
