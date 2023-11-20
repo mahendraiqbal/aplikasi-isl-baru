@@ -11,44 +11,113 @@ import {
   TouchableOpacity,
   ScrollView,
   Button,
+  Platform,
 } from "react-native";
 
 import Loader from "../../../components/Loader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNetInfo } from "@react-native-community/netinfo";
-import { Camera } from "expo-camera";
+import { Camera, CameraType } from "expo-camera";
+import * as ImagePicker from "expo-image-picker";
+import * as Location from "expo-location";
 
 const AddFdlKebisingan = ({ navigation }) => {
   const netInfo = useNetInfo();
   const [noSample, setNosample] = useState("");
   const [penamaanTitik, setPenamaanTitik] = useState("");
   const [penamaanTambahan, setPenamaanTambahan] = useState("");
+  const [sumberKebisingan, setSumberKebisingan] = useState("");
+  const [jenisFrekuensi, setJenisFrekuensi] = useState("");
+  const [titikKoordinatSampling, setTitikKoordinatSampling] = useState("");
+  const [jamPengambilan, setJamPengambilan] = useState("");
+  const [jenisPengujian, setJenisPengujian] = useState("");
+  const [kategoriPengujian, setKategoriPengujian] = useState("");
+  const [shiftPengambilan, setShiftPengambilan] = useState("");
+  const [suhuUdara, setSuhuUdara] = useState("");
+  const [kelembapanUdara, setKelembapanUdara] = useState("");
+  const [dataArray, setDataArray] = useState([]);
+  const [currentInput, setCurrentInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [errortext, setErrortext] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [cameraVisible, setCameraVisible] = useState(false);
-
-  const [hasCameraPermission, setHasCameraPermission] = useState(null);
+  const [cameraPermission, setCameraPermission] = useState(null);
   const [camera, setCamera] = useState(null);
   const [image, setImage] = useState(null);
-  const [type, setType] = useState(Camera.Constants.Type.back);
+  const [showCamera, setShowCamera] = useState(false);
+  const [showCloseButton, setShowCloseButton] = useState(false);
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+
   useEffect(() => {
     (async () => {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        alert("Sorry, we need camera roll permissions to make this work!");
+      }
+
       const cameraStatus = await Camera.requestCameraPermissionsAsync();
-      setHasCameraPermission(cameraStatus.status === "granted");
+      setCameraPermission(cameraStatus.status === "granted");
     })();
   }, []);
 
+  useEffect(() => {
+    // This effect will be triggered whenever currentInput changes
+    const timeoutId = setTimeout(() => {
+      if (currentInput.trim() !== "") {
+        // Add the current input to the array
+        setDataArray((prevData) => [...prevData, currentInput]);
+
+        // Clear the current input
+        setCurrentInput("");
+      }
+    }, 3000); // Set the delay time (3 seconds in this example)
+
+    // Clean up the timeout on component unmount or when currentInput changes
+    return () => clearTimeout(timeoutId);
+  }, [currentInput]);
+
+  const formatCoordinates = (latitude, longitude) => {
+    const formatPart = (value, direction) => {
+      const directionSymbol =
+        direction === "latitude"
+          ? value < 0
+            ? "S"
+            : "N"
+          : value < 0
+          ? "W"
+          : "E";
+      const absoluteValue = Math.abs(value);
+      const degrees = Math.floor(absoluteValue);
+      const minutes = Math.floor((absoluteValue - degrees) * 60);
+      const seconds = ((absoluteValue - degrees - minutes / 60) * 3600).toFixed(
+        4
+      );
+      return `${directionSymbol}${degrees}°${minutes}'${seconds}"`;
+    };
+
+    const formattedLatitude = formatPart(latitude, "latitude");
+    const formattedLongitude = formatPart(longitude, "longitude");
+    return `${formattedLatitude} ${formattedLongitude}`;
+  };
+
+  const handleInputChange = (input) => {
+    const regex = /^\d+(\.\d{0,1})?$/;
+    if (regex.test(input)) {
+      setCurrentInput(input);
+    }
+  };
+
   const takePicture = async () => {
     if (camera) {
-      try {
-        const data = await camera.takePictureAsync(null);
-        console.log(data.uri);
-        setImage(data.uri);
-        setCameraVisible(false);
-      } catch (error) {
-        console.error("Error taking picture:", error);
-        Alert.alert("Error", "Failed to take a picture.");
+      const photo = await camera.takePictureAsync();
+      setImage(photo.uri);
+
+      if (photo.assets && photo.assets.length > 0) {
+        const selectedAsset = photo.assets[0];
+        // Access the URI or other properties from the selected asset
+        console.log("Selected Asset URI:", selectedAsset.uri);
       }
     }
   };
@@ -142,8 +211,55 @@ const AddFdlKebisingan = ({ navigation }) => {
     // Add any other logic you need for cancel
   };
 
-  const handleOpenCamera = () => {
-    setCameraVisible(true);
+  const openCamera = async () => {
+    setShowCamera(true);
+  };
+
+  const closeCamera = () => {
+    setShowCamera(false);
+    setShowCloseButton(false);
+  };
+
+  const openGallery = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        if (result.assets && result.assets.length > 0) {
+          const selectedAsset = result.assets[0];
+          // Access the URI or other properties from the selected asset
+          setImage(selectedAsset.uri);
+        }
+      }
+    } catch (error) {
+      console.error("Error picking an image", error);
+    }
+  };
+
+  const getLocation = async () => {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setErrorMsg("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+
+      // Set TitikKoordinatSampling with the obtained coordinates in the desired format
+      const formattedCoordinates = formatCoordinates(
+        location.coords.latitude,
+        location.coords.longitude
+      );
+      setTitikKoordinatSampling(formattedCoordinates);
+    } catch (error) {
+      console.error("Error getting location:", error);
+      setErrorMsg("Error getting location");
+    }
   };
 
   return (
@@ -203,7 +319,9 @@ const AddFdlKebisingan = ({ navigation }) => {
                 <Text style={styles.textLabel}>Penamaan Titik</Text>
                 <TextInput
                   style={styles.inputStyle}
-                  onChangeText={(PenamaanTitik) => setPenamaanTitik(PenamaanTitik)}
+                  onChangeText={(PenamaanTitik) =>
+                    setPenamaanTitik(PenamaanTitik)
+                  }
                   underlineColorAndroid="#f000"
                   placeholder="Enter Penamaan Titik"
                   placeholderTextColor="#8b9cb5"
@@ -213,10 +331,12 @@ const AddFdlKebisingan = ({ navigation }) => {
                 />
               </View>
               <View style={styles.SectionStyle}>
-              <Text style={styles.textLabel}>Penamaan Tambahan</Text>
+                <Text style={styles.textLabel}>Penamaan Tambahan</Text>
                 <TextInput
                   style={styles.inputStyle}
-                  onChangeText={(PenamaanTambahan) => setPenamaanTambahan(PenamaanTambahan)}
+                  onChangeText={(PenamaanTambahan) =>
+                    setPenamaanTambahan(PenamaanTambahan)
+                  }
                   underlineColorAndroid="#f000"
                   placeholder="Enter Penamaan Tambahan"
                   placeholderTextColor="#8b9cb5"
@@ -225,35 +345,204 @@ const AddFdlKebisingan = ({ navigation }) => {
                   blurOnSubmit={false}
                 />
               </View>
-              {cameraVisible && (
-                <>
+              <View style={styles.SectionStyle}>
+                <Text style={styles.textLabel}>Sumber Kebisingan</Text>
+                <TextInput
+                  style={styles.inputStyle}
+                  onChangeText={(SumberKebisingan) =>
+                    setSumberKebisingan(SumberKebisingan)
+                  }
+                  underlineColorAndroid="#f000"
+                  placeholder="Enter Penamaan Tambahan"
+                  placeholderTextColor="#8b9cb5"
+                  autoCapitalize="sentences"
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                />
+              </View>
+              <View style={styles.SectionStyle}>
+                <Text style={styles.textLabel}>Jenis Frekuensi</Text>
+                <TextInput
+                  style={styles.inputStyle}
+                  onChangeText={(JenisFrekuensi) =>
+                    setJenisFrekuensi(JenisFrekuensi)
+                  }
+                  underlineColorAndroid="#f000"
+                  placeholder="Enter Penamaan Tambahan"
+                  placeholderTextColor="#8b9cb5"
+                  autoCapitalize="sentences"
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                />
+              </View>
+              <View>
+                <View style={styles.SectionStyle}>
+                  <Text style={styles.textLabel}>Titik Koordinat Sampling</Text>
+                  <TextInput
+                    style={styles.inputStyle}
+                    onChangeText={(text) => setTitikKoordinatSampling(text)}
+                    value={titikKoordinatSampling}
+                    underlineColorAndroid="#f000"
+                    placeholder="Titik Koordinat Sampling"
+                    placeholderTextColor="#8b9cb5"
+                    autoCapitalize="sentences"
+                    returnKeyType="next"
+                    blurOnSubmit={false}
+                  />
+                </View>
+
+                {/* <Text>Location: {JSON.stringify(location)}</Text> */}
+                {errorMsg && <Text>Error: {errorMsg}</Text>}
+                <Button title="Get Location" onPress={getLocation} />
+              </View>
+              <View style={styles.SectionStyle}>
+                <Text style={styles.textLabel}>Jam Pengambilan</Text>
+                <TextInput
+                  style={styles.inputStyle}
+                  onChangeText={(JamPengambilan) =>
+                    setJamPengambilan(JamPengambilan)
+                  }
+                  underlineColorAndroid="#f000"
+                  placeholder="Enter Penamaan Tambahan"
+                  placeholderTextColor="#8b9cb5"
+                  autoCapitalize="sentences"
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                />
+              </View>
+              <View style={styles.SectionStyle}>
+                <Text style={styles.textLabel}>Jenis Pengujian</Text>
+                <TextInput
+                  style={styles.inputStyle}
+                  onChangeText={(JenisPengujian) =>
+                    setJenisPengujian(JenisPengujian)
+                  }
+                  underlineColorAndroid="#f000"
+                  placeholder="Enter Penamaan Tambahan"
+                  placeholderTextColor="#8b9cb5"
+                  autoCapitalize="sentences"
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                />
+              </View>
+              <View style={styles.SectionStyle}>
+                <Text style={styles.textLabel}>Kategori Pengujian</Text>
+                <TextInput
+                  style={styles.inputStyle}
+                  onChangeText={(KategoriPengujian) =>
+                    setKategoriPengujian(KategoriPengujian)
+                  }
+                  underlineColorAndroid="#f000"
+                  placeholder="Enter Penamaan Tambahan"
+                  placeholderTextColor="#8b9cb5"
+                  autoCapitalize="sentences"
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                />
+              </View>
+              <View style={styles.SectionStyle}>
+                <Text style={styles.textLabel}>Shift Pengambilan</Text>
+                <TextInput
+                  style={styles.inputStyle}
+                  onChangeText={(ShiftPengambilan) =>
+                    setShiftPengambilan(ShiftPengambilan)
+                  }
+                  underlineColorAndroid="#f000"
+                  placeholder="Enter Penamaan Tambahan"
+                  placeholderTextColor="#8b9cb5"
+                  autoCapitalize="sentences"
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                />
+              </View>
+              <View style={styles.SectionStyle}>
+                <Text style={styles.textLabel}>Suhu Udara</Text>
+                <TextInput
+                  style={styles.inputStyle}
+                  onChangeText={(SuhuUdara) => setSuhuUdara(SuhuUdara)}
+                  underlineColorAndroid="#f000"
+                  placeholder="Enter Penamaan Tambahan"
+                  placeholderTextColor="#8b9cb5"
+                  autoCapitalize="sentences"
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                />
+              </View>
+              <View style={styles.SectionStyle}>
+                <Text style={styles.textLabel}>Kelembapan Udara</Text>
+                <TextInput
+                  style={styles.inputStyle}
+                  onChangeText={(KelembapanUdara) =>
+                    setKelembapanUdara(KelembapanUdara)
+                  }
+                  underlineColorAndroid="#f000"
+                  placeholder="Enter Penamaan Tambahan"
+                  placeholderTextColor="#8b9cb5"
+                  autoCapitalize="sentences"
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                />
+              </View>
+              <View style={styles.SectionStyle}>
+                <Text style={styles.textLabel}>Data</Text>
+                <TextInput
+                  style={styles.inputDataArray}
+                  onChangeText={handleInputChange}
+                  underlineColorAndroid="#f000"
+                  placeholder="Enter Data"
+                  placeholderTextColor="#8b9cb5"
+                  autoCapitalize="sentences"
+                  returnKeyType="next"
+                  blurOnSubmit={false}
+                  value={currentInput}
+                />
+                <Text>Current Data Array: {JSON.stringify(dataArray)}</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                {!showCamera && (
+                  <TouchableOpacity
+                    style={styles.buttonTake}
+                    onPress={openCamera}
+                  >
+                    <Text style={styles.textTake}>Open Camera</Text>
+                  </TouchableOpacity>
+                )}
+
+                {showCamera && (
                   <View style={styles.cameraContainer}>
                     <Camera
+                      style={styles.camera}
+                      type={Camera.Constants.Type.back}
                       ref={(ref) => setCamera(ref)}
-                      style={styles.fixedRatio}
-                      type={type}
-                      ratio={"1:1"}
-                    />
+                    >
+                      <TouchableOpacity
+                        style={styles.buttonTakePicture}
+                        onPress={takePicture}
+                      >
+                        <Text style={styles.textTake}>Take Picture</Text>
+                      </TouchableOpacity>
+                    </Camera>
                   </View>
-                  <Button
-                    title="Flip Image"
-                    onPress={() => {
-                      setType(
-                        type === Camera.Constants.Type.back
-                          ? Camera.Constants.Type.front
-                          : Camera.Constants.Type.back
-                      );
-                    }}
-                  />
-                  {image && <Image source={{ uri: image }} style={{ flex: 1 }} />}
-                  <TouchableOpacity
-                    style={styles.cameraButtonStyle}
-                    activeOpacity={0.5}
-                    onPress={takePicture}
-                  >
-                    <Text style={styles.buttonTextStyle}>Take Picture</Text>
-                  </TouchableOpacity>
-                </>
+                )}
+                <TouchableOpacity
+                  style={styles.buttonTake}
+                  onPress={closeCamera}
+                >
+                  <Text style={styles.textTake}>Close Camera</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.buttonBrowse}
+                  onPress={openGallery}
+                >
+                  <Text style={styles.textBrowse}>Browse from gallery</Text>
+                </TouchableOpacity>
+              </View>
+
+              {image && (
+                <Image
+                  source={{ uri: image }}
+                  style={{ width: 200, height: 200 }}
+                />
               )}
 
               {/* Save and Cancel Buttons */}
@@ -282,14 +571,51 @@ const AddFdlKebisingan = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  buttonTake: {
+    alignItems: "center",
+    backgroundColor: "blue",
+    padding: 10,
+    margin: 20,
+  },
+  buttonBrowse: {
+    alignItems: "center",
+    backgroundColor: "blue",
+    padding: 10,
+    margin: 20,
+  },
+  buttonTakePicture: {
+    alignItems: "center",
+    backgroundColor: "red",
+    padding: 10,
+    margin: 20,
+  },
+  textTake: {
+    color: "white",
+    fontSize: 16,
+  },
+  textBrowse: {
+    color: "white",
+    fontSize: 16,
+  },
+  cameraContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  camera: {
+    width: 300, // Set the desired width
+    height: 400, // Set the desired height
+  },
   SectionStyle: {
-    flexDirection: "row",
+    flexDirection: "column",
     height: 40,
     marginTop: 20,
     marginLeft: 35,
     marginRight: 35,
     margin: 10,
-    flexDirection: 'column',
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
   },
   textLabel: {
     fontSize: 16,
