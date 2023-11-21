@@ -1,62 +1,62 @@
-import React from "react";
-import { View, Image } from "react-native";
+import 'react-native-gesture-handler';
 
-// imported screen
-import Login from "./screens/Login";
-import Home from "./screens/Home";
+// Import React and Component
+import React from 'react';
 
-import { createStackNavigator } from "@react-navigation/stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+// Import Navigators from React Navigation
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+
+// Import Screens
+import SplashScreen from './screens/SplashScreen';
+import LoginScreen from './screens/Login';
+import DrawerNavigationRoutes from './screens/DrawerNavigationRoutes';
+import Limbah from './screens/DrawerScreens/AIR/Limbah';
+// import Tabs from './Screen/DrawerScreens/FdlAirCreen';
 
 const Stack = createStackNavigator();
-const Tab = createBottomTabNavigator();
 
-const BottomTab = () => {
-  <Tab.Navigator
-    initialRouteName="Home"
-    screenOptions={{
-      headerShown: false,
-      tabBarShowLabel: false,
-      tabBarStyle: {
-        height: 60,
-      },
-    }}
-  >
-    <Tab.Screen
-      options={{
-        tabBarIcon: ({ focused }) => (
-          <View>
-            <Image
-            source={require('../assets/home.png')}
-              resizeMode="cover"
-              style={{
-                width: 50,
-                height: 50,
-                tintColor: focused && "#ffcd61",
-              }}
+const Auth = () => {
+    return (
+        <Stack.Navigator initialRouteName="LoginScreen">
+            <Stack.Screen
+                name="LoginScreen"
+                component={LoginScreen}
+                options={{ headerShown: false }}
             />
-          </View>
-        ),
-        tabBarActiveBackgroundColor: "#f5f5f5",
-      }}
-      name="Home"
-      component={Home}
-    />
-  </Tab.Navigator>;
+        </Stack.Navigator>
+    );
 };
 
-const Router = () => {
-  return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Stack.Screen name="Login" component={Login} />
-      <Stack.Screen name="Home" component={Home} />
-      <Stack.Screen name="BotTab" component={BottomTab} />
-    </Stack.Navigator>
-  );
+const App = () => {
+    return (
+            <Stack.Navigator initialRouteName="SplashScreen">
+                {/* SplashScreen which will come once for 5 Seconds */}
+                <Stack.Screen
+                    name="SplashScreen"
+                    component={SplashScreen}
+                    // Hiding header for Splash Screen
+                    options={{ headerShown: false }}
+                />
+                {/* Auth Navigator: Include Login and Signup */}
+                <Stack.Screen
+                    name="Auth"
+                    component={Auth}
+                    options={{ headerShown: false }}
+                />
+                {/* Navigation Drawer as a landing page */}
+                <Stack.Screen
+                    name="DrawerNavigationRoutes"
+                    component={DrawerNavigationRoutes}
+                    options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                    name="Limbah"
+                    component={Limbah}
+                    options={{ headerShown: false }}
+                />
+            </Stack.Navigator>
+    );
 };
 
-export default Router;
+export default App;
