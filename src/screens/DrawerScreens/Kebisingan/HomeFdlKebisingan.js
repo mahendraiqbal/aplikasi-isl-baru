@@ -201,13 +201,12 @@
 
 // import React, { useState, useRef, useEffect } from "react";
 import {
-    StyleSheet,
-    Dimensions,
     View,
     Text,
     TouchableOpacity,
     SafeAreaView,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HomeFdlKebisingan = ({ navigation }) => {
     return (
@@ -227,6 +226,11 @@ const HomeFdlKebisingan = ({ navigation }) => {
                         }}>
                         HOME FDL KEBISINGAN
                     </Text>
+                    <TouchableOpacity onPress={() => {
+                        AsyncStorage.removeItem('kebisingan');
+                    }}>
+                        <Text>Remove</Text>
+                    </TouchableOpacity>
                 </View>
             </View>
         </SafeAreaView>

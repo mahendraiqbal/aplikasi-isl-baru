@@ -27,11 +27,14 @@ import * as Location from "expo-location";
 import { Icon, IconButton, MD3Colors } from "react-native-paper";
 import DateTimePicker from '@react-native-community/datetimepicker';
 
+import stateStorage from "../../../components/stateStorageKebisingan";
+
 const AddFdlKebisingan = ({ navigation }) => {
+    const local = stateStorage('kebisingan');
     const netInfo = useNetInfo();
-    const [noSample, setNosample] = useState("");
-    const [penamaanTitik, setPenamaanTitik] = useState("");
-    const [penamaanTambahan, setPenamaanTambahan] = useState("");
+    const [noSample, setNosample] = useState(local.noSample);
+    const [penamaanTitik, setPenamaanTitik] = useState(local.penamaanTitik);
+    const [penamaanTambahan, setPenamaanTambahan] = useState(local.penamaanTambahan);
     const [sumberKebisingan, setSumberKebisingan] = useState("");
     const [jenisFrekuensi, setJenisFrekuensi] = useState("");
     const [titikKoordinatSampling, setTitikKoordinatSampling] = useState("");
@@ -75,7 +78,10 @@ const AddFdlKebisingan = ({ navigation }) => {
 
     const kategoriPengujianRef = useRef();
 
+    
+
     useEffect(()=>{
+        
         AsyncStorage.getItem('access').then((value) => {
             var token = JSON.parse(value)
             if(new Date() >= new Date(token.expired)){
@@ -104,7 +110,6 @@ const AddFdlKebisingan = ({ navigation }) => {
             if (status !== "granted") {
                 alert("Sorry, we need camera roll permissions to make this work!");
             }
-
             const cameraStatus = await Camera.requestCameraPermissionsAsync();
             setCameraPermission(cameraStatus.status === "granted");
         })();
@@ -137,6 +142,23 @@ const AddFdlKebisingan = ({ navigation }) => {
             setShowData_(false)
             RenderInput(dataArray)
         }
+    
+    }
+    
+    const storeSate = async (data) => {
+        try {
+            AsyncStorage.getItem('kebisingan').then((value) => {
+                let array = JSON.parse(value)
+                array = {...array, ...data}
+
+                AsyncStorage.setItem('kebisingan', JSON.stringify(array));
+                AsyncStorage.getItem('kebisingan').then((item) => {
+                    console.log(item)
+                })
+            })
+        } catch (error) {
+            Alert.alert('Can not Sync..')
+        }
     }
 
     const RenderInput = async (data) => {
@@ -153,7 +175,6 @@ const AddFdlKebisingan = ({ navigation }) => {
                     autoCapitalize="sentences"
                     returnKeyType="next"
                     blurOnSubmit={false}>
-
                 </TextInput>
             )
         }
@@ -204,7 +225,6 @@ const AddFdlKebisingan = ({ navigation }) => {
             }
             if (photo.assets && photo.assets.length > 0) {
                 const selectedAsset = photo.assets[0];
-                // Access the URI or other properties from the selected asset
                 console.log("Selected Asset URI:", selectedAsset.uri);
             }
 
@@ -307,7 +327,7 @@ const AddFdlKebisingan = ({ navigation }) => {
 
     const handleCancelButton = () => {
         setShowForm(false);
-        setNosample("");
+        // setNosample("");
         setImage(null);
         setImageLain(null);
         setCameraVisible(false);
@@ -425,7 +445,13 @@ const AddFdlKebisingan = ({ navigation }) => {
                     <View style={styles.SectionStyle}>
                         <TextInput
                             style={styles.inputStyle}
-                            onChangeText={(NoSample) => setNosample(NoSample)}
+                            onChangeText={(NoSample) => {
+                                setNosample(NoSample)
+                                var val = new Object();
+                                val.noSample = NoSample;
+                                storeSate(val)
+                            }}
+
                             underlineColorAndroid="#f000"
                             placeholder="Enter No Sample"
                             placeholderTextColor="#8b9cb5"
@@ -456,9 +482,12 @@ const AddFdlKebisingan = ({ navigation }) => {
                                 <Text style={styles.textLabel}>Penamaan Titik</Text>
                                 <TextInput
                                     style={styles.inputStyle}
-                                    onChangeText={(PenamaanTitik) =>
+                                    onChangeText={(PenamaanTitik) =>{
                                         setPenamaanTitik(PenamaanTitik)
-                                    }
+                                        var val = new Object();
+                                        val.penamaanTitik = PenamaanTitik;
+                                        storeSate(val)
+                                    }}
                                     value={penamaanTitik}
                                     underlineColorAndroid="#f000"
                                     placeholder="Enter Penamaan Titik"
