@@ -233,12 +233,12 @@ const AddFdlKebisingan = ({ navigation }) => {
             
             if (Cam == 1) {
                 setImage(photo.uri);
-                setFotoLok(base64Image);
-                storeSate({ foto_lok: base64Image});
+                setFotoLok('data:image/jpeg;base64,'+base64Image);
+                storeSate({ foto_lok: 'data:image/jpeg;base64,'+base64Image});
             } else if (Cam == 2) {
                 setImageLain(photo.uri);
-                setFotoLain(base64Image);
-                storeSate({ foto_lain: base64Image});
+                setFotoLain('data:image/jpeg;base64,'+base64Image);
+                storeSate({ foto_lain: 'data:image/jpeg;base64,'+base64Image});
             }
             if (photo.assets && photo.assets.length > 0) {
                 const selectedAsset = photo.assets[0];
@@ -282,6 +282,8 @@ const AddFdlKebisingan = ({ navigation }) => {
               encoding: FileSystem.EncodingType.Base64,
             }
           );
+
+          console.log(resizedFileContent);
     
           return resizedFileContent;
         } catch (error) {
