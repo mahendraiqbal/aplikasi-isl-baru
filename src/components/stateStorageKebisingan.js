@@ -5,7 +5,7 @@ export default function stateStorageKebisingan(key) {
     useEffect(() => {
         AsyncStorage.getItem(key).then((value) => {
             let data = JSON.parse(value);
-            if(data.noSample){
+            if(data.no_sample){
                 setStorage(data)
             } else {
                 var kebisingan = new Object();

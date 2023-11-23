@@ -33,7 +33,7 @@ const AddFdlKebisingan = ({ navigation }) => {
     const local = stateStorage('kebisingan');
     const netInfo = useNetInfo();
     const [noSample, setNosample] = useState(local.no_sample);
-    const [penamaanTitik, setPenamaanTitik] = useState(local.keterangan_4);
+    const [keterangan_4, setKeterangan_4] = useState(local.keterangan_4);
     const [penamaanTambahan, setPenamaanTambahan] = useState(local.penamaanTambahan);
     const [sumberKebisingan, setSumberKebisingan] = useState(local.sumber_keb);
     const [jenisFrekuensi, setJenisFrekuensi] = useState(local.jenis_frek);
@@ -329,7 +329,7 @@ const AddFdlKebisingan = ({ navigation }) => {
             setJamPengambilan(time);
       
             // Store the selected time
-            storeSate({ jamPengambilan: formattedTime });
+            storeSate({ waktu: formattedTime });
           }
 
     };
@@ -462,7 +462,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                             onChangeText={(NoSample) => {
                                 setNosample(NoSample)
                                 var val = new Object();
-                                val.noSample = NoSample;
+                                val.no_sample = NoSample;
                                 storeSate(val)
                             }}
 
@@ -472,6 +472,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                             autoCapitalize="sentences"
                             returnKeyType="next"
                             blurOnSubmit={false}
+                            value={local.no_sample}
                         />
                     </View>
 
@@ -497,12 +498,12 @@ const AddFdlKebisingan = ({ navigation }) => {
                                 <TextInput
                                     style={styles.inputStyle}
                                     onChangeText={(PenamaanTitik) =>{
-                                        setPenamaanTitik(PenamaanTitik)
+                                        setKeterangan_4(PenamaanTitik)
                                         var val = new Object();
-                                        val.penamaanTitik = PenamaanTitik;
+                                        val.keterangan_4 = PenamaanTitik;
                                         storeSate(val)
                                     }}
-                                    value={local.penamaanTitik}
+                                    value={local.keterangan_4}
                                     underlineColorAndroid="#f000"
                                     placeholder="Enter Penamaan Titik"
                                     placeholderTextColor="#8b9cb5"
@@ -538,7 +539,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                                     onChangeText={(SumberKebisingan) => {
                                         setSumberKebisingan(SumberKebisingan)
                                         var val = new Object();
-                                        val.sumberKebisingan = SumberKebisingan;
+                                        val.sumber_keb = SumberKebisingan;
                                         storeSate(val)
                                     }
                                     }
@@ -559,7 +560,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                                     onSelect={(selectedItem, index) => {
                                         setJenisFrekuensi(selectedItem)
                                         var val = new Object();
-                                        val.jenisFrekuensi = selectedItem;
+                                        val.jen_frek = selectedItem;
                                         storeSate(val)
                                         console.log(selectedItem)
                                     }}
@@ -575,7 +576,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                                         onChangeText={(text) => {
                                             setTitikKoordinatSampling(text)
                                             var val = new Object();
-                                            val.titikKoordinatSampling = text;
+                                            val.posisi = text;
                                             storeSate(val)
                                         }
                                         }
@@ -607,7 +608,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                                             onChangeText={(JamPengambilan) => {
                                                 setJamPengambilan(JamPengambilan)
                                                 console.log(jamPengambilan)
-                                                storeSate({ jamPengambilan: JamPengambilan });
+                                                storeSate({ waktu: JamPengambilan });
                                             }
                                             }
                                             editable={false}
@@ -708,7 +709,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                                         onChangeText={(SuhuUdara) => {
                                             setSuhuUdara(SuhuUdara)
                                             var val = new Object();
-                                            val.suhuUdara = SuhuUdara;
+                                            val.suhu_udara = SuhuUdara;
                                             storeSate(val)
                                         } 
                                         }
@@ -728,7 +729,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                                         onChangeText={(KelembapanUdara) => {
                                             setKelembapanUdara(KelembapanUdara)
                                             var val = new Object();
-                                            val.kelembapanUdara = KelembapanUdara;
+                                            val.kelembapan_udara = KelembapanUdara;
                                             storeSate(val)
                                         }
                                         }

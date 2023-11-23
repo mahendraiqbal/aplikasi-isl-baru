@@ -24,6 +24,8 @@ import { useNetInfo } from "@react-native-community/netinfo";
 import { Camera, FlashMode } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
+import * as FileSystem from 'expo-file-system';
+import * as ImageManipulator from 'expo-image-manipulator';
 import { Icon, IconButton, MD3Colors } from "react-native-paper";
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -32,21 +34,25 @@ import stateStorage from "../../../components/stateStorageKebisingan";
 const AddFdlKebisingan = ({ navigation }) => {
     const local = stateStorage('kebisingan');
     const netInfo = useNetInfo();
-    const [noSample, setNosample] = useState(local.noSample);
-    const [penamaanTitik, setPenamaanTitik] = useState(local.penamaanTitik);
+    const [noSample, setNosample] = useState(local.no_sample);
+    const [penamaanTitik, setPenamaanTitik] = useState(local.keterangan_4);
     const [penamaanTambahan, setPenamaanTambahan] = useState(local.penamaanTambahan);
-    const [sumberKebisingan, setSumberKebisingan] = useState(local.sumberKebisingan);
-    const [jenisFrekuensi, setJenisFrekuensi] = useState(local.jenisFrekuensi);
-    const [titikKoordinatSampling, setTitikKoordinatSampling] = useState(local.titikKoordinatSampling);
-    const [jamPengambilan, setJamPengambilan] = useState(local.jamPengambilan);
+    const [sumberKebisingan, setSumberKebisingan] = useState(local.sumber_keb);
+    const [jenisFrekuensi, setJenisFrekuensi] = useState(local.jen_frek);
+    const [titikKoordinatSampling, setTitikKoordinatSampling] = useState(local.posisi);
+    const [jamPengambilan, setJamPengambilan] = useState(local.waktu);
     const [jenisPengujian, setJenisPengujian] = useState(local.jenisPengujian);
-    const [kategoriPengujian, setKategoriPengujian] = useState(local.kategoriPengujian);
+    const [kategoriPengujian, setKategoriPengujian] = useState(local.jenis_durasi);
     const [shiftPengambilan, setShiftPengambilan] = useState(local.shiftPengambilan);
     const [shift_, setShift_] = useState(local.shift_);
-    const [suhuUdara, setSuhuUdara] = useState(local.suhuUdara);
-    const [kelembapanUdara, setKelembapanUdara] = useState(local.kelembapanUdara);
+    const [suhuUdara, setSuhuUdara] = useState(local.suhu_udara);
+    const [kelembapanUdara, setKelembapanUdara] = useState(local.kelembapan_udara);
     const [lat, setLat] = useState(local.lat);
-    const [long, setLong] = useState(local.long);
+    const [longi, setLongi] = useState(local.longi);
+    const [fotoLain, setFotoLain] = useState(local.foto_lain);
+    const [fotoLok, setFotoLok] = useState(local.foto_lok);
+    
+    const [isEditing, setIsEditing] = useState(false);
 
     const [dataArray, setDataArray] = useState([]);
     const [showData_, setShowData_] = useState(true);
@@ -134,6 +140,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                     setDataArray((prevData) => [...prevData, currentInput]);
                     setSec(dataArray.length + 2);
                     setCurrentInput("");
+                    storeSate({kebisingan: (prevData) => [...prevData, currentInput]})
                 }
             }
         }, 5000);
@@ -213,6 +220,7 @@ const AddFdlKebisingan = ({ navigation }) => {
         const regex = /^\d+(\.\d{0,1})?$/;
         if (regex.test(input)) {
             setCurrentInput(input);
+            console.log(input)
         }
     };
 
@@ -221,20 +229,65 @@ const AddFdlKebisingan = ({ navigation }) => {
         if (camera) {
             const options = { quality: 0.5, base64: true, skipProcessing: true };
             const photo = await camera.takePictureAsync(options);
+
+            
             if (Cam == 1) {
                 setImage(photo.uri);
+                setFotoLok(base64Image);
+                storeSate({ foto_lok: base64Image});
             } else if (Cam == 2) {
                 setImageLain(photo.uri);
+                setFotoLain(base64Image);
+                storeSate({ foto_lain: base64Image});
             }
             if (photo.assets && photo.assets.length > 0) {
                 const selectedAsset = photo.assets[0];
-                console.log("Selected Asset URI:", selectedAsset.uri);
             }
+
+            const base64Image = await convertImageToBase64(photo.uri);
 
             closeCamera();
         }
         handleModal();
     };
+
+    const MAX_FILE_SIZE = 300 * 1024;
+
+    const convertImageToBase64 = async (imageUri) => {
+        try {
+          // Read the image file
+          const fileContent = await FileSystem.readAsStringAsync(imageUri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
+
+          const { width, height } = await ImageManipulator.manipulateAsync(
+            imageUri,
+            [],
+            { format: 'jpeg' } 
+          );
+
+          const scaleFactor = Math.min(1, MAX_FILE_SIZE / fileContent.length);
+          const newWidth = Math.floor(width * scaleFactor);
+          const newHeight = Math.floor(height * scaleFactor);
+
+          const resizedImage = await ImageManipulator.manipulateAsync(
+            imageUri,
+            [{ resize: { width: newWidth, height: newHeight } }],
+            { format: 'jpeg' } 
+          );
+
+          const resizedFileContent = await FileSystem.readAsStringAsync(
+            resizedImage.uri,
+            {
+              encoding: FileSystem.EncodingType.Base64,
+            }
+          );
+    
+          return resizedFileContent;
+        } catch (error) {
+          console.error('Error converting image to base64:', error);
+        }
+      };
 
     const handleSubmitButton = () => {
         setErrortext("");
@@ -327,7 +380,7 @@ const AddFdlKebisingan = ({ navigation }) => {
             setJamPengambilan(time);
       
             // Store the selected time
-            storeSate({ jamPengambilan: formattedTime });
+            storeSate({ waktu: time });
           }
 
     };
@@ -410,12 +463,23 @@ const AddFdlKebisingan = ({ navigation }) => {
             let location = await Location.getCurrentPositionAsync({});
             setLocation(location);
 
-            // Set TitikKoordinatSampling with the obtained coordinates in the desired format
+            const lat = location.coords.latitude;
+            const longi = location.coords.longitude;
+
+            console.log(longi);
+            console.log(lat);
+
+            setLat(lat);
+            setLongi(longi);
+            storeSate({lat: lat});
+            storeSate({longi: longi})
+
             const formattedCoordinates = formatCoordinates(
                 location.coords.latitude,
                 location.coords.longitude
             );
             setTitikKoordinatSampling(formattedCoordinates);
+            storeSate({posisi: formatCoordinates})
         } catch (error) {
             console.error("Error getting location:", error);
             setErrorMsg("Error getting location");
@@ -460,7 +524,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                             onChangeText={(NoSample) => {
                                 setNosample(NoSample)
                                 var val = new Object();
-                                val.noSample = NoSample;
+                                val.no_sample = NoSample;
                                 storeSate(val)
                             }}
 
@@ -470,6 +534,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                             autoCapitalize="sentences"
                             returnKeyType="next"
                             blurOnSubmit={false}
+                            value={noSample}
                         />
                     </View>
 
@@ -494,20 +559,21 @@ const AddFdlKebisingan = ({ navigation }) => {
                                 <Text style={styles.textLabel}>Penamaan Titik</Text>
                                 <TextInput
                                     style={styles.inputStyle}
-                                    onChangeText={(PenamaanTitik) =>{
-                                        setPenamaanTitik(PenamaanTitik)
+                                    onChangeText={(PenamaanTitik) => {
+                                        setPenamaanTitik(PenamaanTitik);
                                         var val = new Object();
-                                        val.penamaanTitik = PenamaanTitik;
-                                        storeSate(val)
+                                        val.keterangan_4 = PenamaanTitik;
+                                        storeSate(val);
                                     }}
-                                    value={local.penamaanTitik}
+                                    value={penamaanTitik}
+                                    editable={true}
                                     underlineColorAndroid="#f000"
                                     placeholder="Enter Penamaan Titik"
                                     placeholderTextColor="#8b9cb5"
                                     autoCapitalize="sentences"
                                     returnKeyType="next"
                                     blurOnSubmit={false}
-                                />
+/>
                             </View>
                             <View style={styles.SectionStyle}>
                                 <Text style={styles.textLabel}>Penamaan Tambahan</Text>
@@ -526,7 +592,8 @@ const AddFdlKebisingan = ({ navigation }) => {
                                     autoCapitalize="sentences"
                                     returnKeyType="next"
                                     blurOnSubmit={false}
-                                    value={local.penamaanTambahan}
+                                    value={isEditing ? local.penamaanTambahan : penamaanTambahan}
+                                    editable={true}
                                 />
                             </View>
                             <View style={styles.SectionStyle}>
@@ -534,9 +601,11 @@ const AddFdlKebisingan = ({ navigation }) => {
                                 <TextInput
                                     style={styles.inputStyle}
                                     onChangeText={(SumberKebisingan) => {
+                                        SumberKebisingan = SumberKebisingan || '';
+
                                         setSumberKebisingan(SumberKebisingan)
                                         var val = new Object();
-                                        val.sumberKebisingan = SumberKebisingan;
+                                        val.sumber_keb = SumberKebisingan;
                                         storeSate(val)
                                     }
                                     }
@@ -546,7 +615,8 @@ const AddFdlKebisingan = ({ navigation }) => {
                                     autoCapitalize="sentences"
                                     returnKeyType="next"
                                     blurOnSubmit={false}
-                                    value={local.sumberKebisingan}
+                                    value={isEditing ? local.sumber_keb : sumberKebisingan}
+                                    editable={true}
                                 />
                             </View>
                             <View style={styles.SectionStyle}>
@@ -557,7 +627,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                                     onSelect={(selectedItem, index) => {
                                         setJenisFrekuensi(selectedItem)
                                         var val = new Object();
-                                        val.jenisFrekuensi = selectedItem;
+                                        val.jen_frek = selectedItem;
                                         storeSate(val)
                                         console.log(selectedItem)
                                     }}
@@ -573,7 +643,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                                         onChangeText={(text) => {
                                             setTitikKoordinatSampling(text)
                                             var val = new Object();
-                                            val.titikKoordinatSampling = text;
+                                            val.posisi = text;
                                             storeSate(val)
                                         }
                                         }
@@ -661,10 +731,10 @@ const AddFdlKebisingan = ({ navigation }) => {
                                             console.log(selectedItem.kategori)
                                             setKategoriPengujian(selectedItem.kategori)
                                             setShift_(selectedItem.shift)
-                                            // var val = new Object();
-                                            // val.kategoriPengujian = selectedItem.kategori;
+                                            var val = new Object();
+                                            val.jenis_durasi = selectedItem.kategori;
                                             // val.shift_ = selectedItem.shift;
-                                            // storeSate(val)
+                                            storeSate(val)
                                         }}
                                         buttonTextAfterSelection={(selectedItem, index) => {
                                             return selectedItem.kategori;
@@ -706,7 +776,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                                         onChangeText={(SuhuUdara) => {
                                             setSuhuUdara(SuhuUdara)
                                             var val = new Object();
-                                            val.suhuUdara = SuhuUdara;
+                                            val.suhu_udara = SuhuUdara;
                                             storeSate(val)
                                         } 
                                         }
@@ -726,7 +796,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                                         onChangeText={(KelembapanUdara) => {
                                             setKelembapanUdara(KelembapanUdara)
                                             var val = new Object();
-                                            val.kelembapanUdara = KelembapanUdara;
+                                            val.kelembapan_udara = KelembapanUdara;
                                             storeSate(val)
                                         }
                                         }
