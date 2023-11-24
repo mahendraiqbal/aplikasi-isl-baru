@@ -58,6 +58,8 @@ const AddFdlKebisingan = ({ navigation }) => {
     const [showData_, setShowData_] = useState(true);
     const [loopData, setLoopData] = useState([]);
     const [showLoopData, setShowLoopData] = useState(FlashMode);
+    const [inputValues, setInputValues] = useState([]);
+
 
     const [currentInput, setCurrentInput] = useState("");
     const [loading, setLoading] = useState(false);
@@ -145,10 +147,10 @@ const AddFdlKebisingan = ({ navigation }) => {
             }
         }, 5000);
         return () => clearTimeout(timeoutId);
-    }, [currentInput]);
+    }, [currentInput, dataArray]);
 
     const Calculate = async () => {
-        if (dataArray.length == 120) {
+        if (dataArray.length == 5) {
             setShowData_(false)
             RenderInput(dataArray)
         }
@@ -172,18 +174,22 @@ const AddFdlKebisingan = ({ navigation }) => {
     }
 
     const RenderInput = async (data) => {
+        console.log(data);
         var body = [];
         body.push(<Text style={styles.textLabelLoop}>Data Kebisingan</Text>)
         for (let i = 0; i < data.length; i++) {
             body.push(
                 <TextInput style={styles.inputStyleLoop}
                     value={data[i]}
+                    key={i}
                     keyboardType='number-pad'
                     underlineColorAndroid="#f000"
                     placeholder="Enter Data"
                     placeholderTextColor="#8b9cb5"
                     autoCapitalize="sentences"
                     returnKeyType="next"
+                    editable={true}
+                    // onChangeText={(text) => handleTextChange(text, i, data)}
                     blurOnSubmit={false}>
                 </TextInput>
             )
@@ -191,6 +197,15 @@ const AddFdlKebisingan = ({ navigation }) => {
         setLoopData(body);
         setShowLoopData(true);
     }
+
+    const handleTextChange = (text, index, data) => {
+        // Update the data array with the edited text
+        console.log(data);
+        const newData = [...data];
+        newData[index] = text;
+        console.log(newData)
+        setCurrentInput(newData);
+      };
 
     const formatCoordinates = (latitude, longitude) => {
         const formatPart = (value, direction) => {
@@ -218,11 +233,10 @@ const AddFdlKebisingan = ({ navigation }) => {
 
     const handleInputChange = (input) => {
         const regex = /^\d+(\.\d{0,1})?$/;
-        if (regex.test(input)) {
-            setCurrentInput(input);
-            console.log(input)
+        if (regex.test(input) || input === '') {
+          setCurrentInput(input);
         }
-    };
+      };
 
     const takePicture = async () => {
 
@@ -333,6 +347,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                             setPenamaanTitik(responseJson.keterangan)
                             setShowForm(true);
                             setCameraVisible(true);
+                            storeSate({keterangan_4: responseJson.keterangan})
                         }
                     })
                     .catch((error) => {

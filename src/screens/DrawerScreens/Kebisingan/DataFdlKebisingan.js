@@ -28,7 +28,7 @@ function ShowData() {
     <>
       <Searchbar
         placeholder="Search"
-        onChangeText={(query) => setSearchQuery(query)}
+        onChangeText={(query) => setSearch(query)}
         value={search}
       />
       <DataTable>
