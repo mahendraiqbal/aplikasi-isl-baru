@@ -1,22 +1,31 @@
 import React from 'react';
-import { view, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, SafeAreaView } from 'react-native';
 
 const DataFdlKebisingan = ({navigation}) => {
-    <view style={styles.container}>
-        <Text>Add Screen Fdl Kebisingan</Text>
-        <Button title='Click Test'>
-            onPress={()=> alert('button di click')}
-        </Button>
-    </view>
+    return (
+        <SafeAreaView style={{ flex: 1 }}>
+            <View style={{ flex: 1, padding: 16 }}>
+                <View
+                    style={{
+                        flex: 1,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}>
+                    <Text
+                        style={{
+                            fontSize: 25,
+                            textAlign: 'center',
+                            marginBottom: 16,
+                        }}>
+                        DATA FDL KEBISINGAN
+                    </Text>
+                    <TouchableOpacity>
+                        <Text>Remove</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </SafeAreaView>
+    );
 }
 
 export default DataFdlKebisingan;
-
-const styles = StyleSheet.create({
-    container : {
-        flex : 1,
-        alignItems : 'top',
-        justifyContent : 'top',
-        backgroundColor : '#8fcbbc'
-    },
-});
