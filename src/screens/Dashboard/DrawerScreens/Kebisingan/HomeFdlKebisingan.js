@@ -200,63 +200,18 @@
 // });
 
 // import React, { useState, useRef, useEffect } from "react";
-import React, { useState, useEffect } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  SafeAreaView,
-  StyleSheet,
-  Image,
+    View,
+    Text,
+    TouchableOpacity,
+    SafeAreaView,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HomeFdlKebisingan = ({ navigation }) => {
-  const [timeNow, setTimeNow] = useState(new Date());
-  const [accessData, setAccessData] = useState("");
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeNow(new Date());
-    }, 1000);
-
-    const fetchAccessData = async () => {
-      try {
-        const accessValue = await AsyncStorage.getItem("access");
-        if (accessValue !== null) {
-          const accessDataObject = JSON.parse(accessValue);
-
-          const identity = accessDataObject?.identity || "";
-
-          setAccessData(identity);
-        }
-      } catch (error) {
-        console.error("Error fetching access data:", error);
-      }
-    };
-
-    fetchAccessData();
-
-    return () => clearInterval(interval);
-  }, []);
-
-  let greeting;
-
-  if (timeNow.getHours() < 12) {
-    greeting = "Selamat Pagi";
-  } else if (timeNow.getHours() < 15) {
-    greeting = "Selamat Siang";
-  } else if (timeNow.getHours() < 18) {
-    greeting = "Selamat Sore";
-  } else {
-    greeting = "Selamat Malam";
-  }
-
-  useEffect(() => {});
-
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      {/* <View style={{ flex: 1, padding: 16 }}>
+    return (
+        <SafeAreaView style={{ flex: 1 }}>
+            <View style={{ flex: 1, padding: 16 }}>
                 <View
                     style={{
                         flex: 1,
@@ -277,75 +232,9 @@ const HomeFdlKebisingan = ({ navigation }) => {
                         <Text>Remove</Text>
                     </TouchableOpacity>
                 </View>
-            </View> */}
-      <View style={styles.container}>
-        <Text style={styles.greetingText}>{greeting}</Text>
-        <Text style={styles.userNameText}>{`${accessData}`}</Text>
-
-        <View style={styles.allData}>
-          <View>
-            <TouchableOpacity style={styles.button}>
-              <Image
-                source={require("../../../../assets/data.png")}
-                style={styles.icon}
-              />
-            </TouchableOpacity>
-            <Text style={styles.buttonText}>Data Online</Text>
-          </View>
-          <View>
-            <TouchableOpacity style={styles.button}>
-              {/* <Image
-                source={require("../../../../assets/data.png")}
-                style={styles.icon}
-              /> */} 
-              <Text style={{fontSize: 43, fontWeight: "bold"}}>0</Text>
-            </TouchableOpacity>
-            <Text style={styles.buttonText}>Data Offline</Text>
-          </View>
-        </View>
-      </View>
-    </SafeAreaView>
-  );
-};
-
-const styles = StyleSheet.create({
-  greetingText: {
-    fontSize: 18,
-  },
-  userNameText: {
-    fontSize: 40,
-    fontWeight: "bold",
-  },
-  container: {
-    borderWidth: 1,
-    borderColor: "gray",
-    borderRadius: 10,
-    padding: 16,
-    margin: 16,
-  },
-  allData: {
-    marginTop: 16,
-    flexDirection: "row",
-    justifyContent: "space-around",
-  },
-  button: {
-    borderWidth: 1,
-    borderColor: "black", // You can set the border color to your preference
-    borderRadius: 8,
-    padding: 8,
-    alignItems: "center",
-    // width: "45%", // Adjust the width as needed
-  },
-  buttonText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "black", // You can set the text color to your preference
-    textAlign: "center"
-  },
-  icon: {
-    width: 50, // Set your desired icon width
-    height: 50, // Set your desired icon height
-  },
-});
+            </View>
+        </SafeAreaView>
+    );
+}
 
 export default HomeFdlKebisingan;

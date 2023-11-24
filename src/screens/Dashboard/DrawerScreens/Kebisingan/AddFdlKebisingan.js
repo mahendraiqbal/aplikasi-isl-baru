@@ -24,8 +24,6 @@ import { useNetInfo } from "@react-native-community/netinfo";
 import { Camera, FlashMode } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
-import * as FileSystem from 'expo-file-system';
-import * as ImageManipulator from 'expo-image-manipulator';
 import { Icon, IconButton, MD3Colors } from "react-native-paper";
 import DateTimePicker from '@react-native-community/datetimepicker';
 
@@ -35,10 +33,10 @@ const AddFdlKebisingan = ({ navigation }) => {
     const local = stateStorage('kebisingan');
     const netInfo = useNetInfo();
     const [noSample, setNosample] = useState(local.no_sample);
-    const [penamaanTitik, setPenamaanTitik] = useState(local.keterangan_4);
+    const [keterangan_4, setKeterangan_4] = useState(local.keterangan_4);
     const [penamaanTambahan, setPenamaanTambahan] = useState(local.penamaanTambahan);
     const [sumberKebisingan, setSumberKebisingan] = useState(local.sumber_keb);
-    const [jenisFrekuensi, setJenisFrekuensi] = useState(local.jen_frek);
+    const [jenisFrekuensi, setJenisFrekuensi] = useState(local.jenis_frek);
     const [titikKoordinatSampling, setTitikKoordinatSampling] = useState(local.posisi);
     const [jamPengambilan, setJamPengambilan] = useState(local.waktu);
     const [jenisPengujian, setJenisPengujian] = useState(local.jenisPengujian);
@@ -48,18 +46,14 @@ const AddFdlKebisingan = ({ navigation }) => {
     const [suhuUdara, setSuhuUdara] = useState(local.suhu_udara);
     const [kelembapanUdara, setKelembapanUdara] = useState(local.kelembapan_udara);
     const [lat, setLat] = useState(local.lat);
-    const [longi, setLongi] = useState(local.longi);
+    const [long, setLong] = useState(local.longi);
     const [fotoLain, setFotoLain] = useState(local.foto_lain);
     const [fotoLok, setFotoLok] = useState(local.foto_lok);
-    
-    const [isEditing, setIsEditing] = useState(false);
 
     const [dataArray, setDataArray] = useState([]);
     const [showData_, setShowData_] = useState(true);
     const [loopData, setLoopData] = useState([]);
     const [showLoopData, setShowLoopData] = useState(FlashMode);
-    const [inputValues, setInputValues] = useState([]);
-
 
     const [currentInput, setCurrentInput] = useState("");
     const [loading, setLoading] = useState(false);
@@ -142,15 +136,14 @@ const AddFdlKebisingan = ({ navigation }) => {
                     setDataArray((prevData) => [...prevData, currentInput]);
                     setSec(dataArray.length + 2);
                     setCurrentInput("");
-                    storeSate({kebisingan: (prevData) => [...prevData, currentInput]})
                 }
             }
         }, 5000);
         return () => clearTimeout(timeoutId);
-    }, [currentInput, dataArray]);
+    }, [currentInput]);
 
     const Calculate = async () => {
-        if (dataArray.length == 5) {
+        if (dataArray.length == 120) {
             setShowData_(false)
             RenderInput(dataArray)
         }
@@ -174,22 +167,18 @@ const AddFdlKebisingan = ({ navigation }) => {
     }
 
     const RenderInput = async (data) => {
-        console.log(data);
         var body = [];
         body.push(<Text style={styles.textLabelLoop}>Data Kebisingan</Text>)
         for (let i = 0; i < data.length; i++) {
             body.push(
                 <TextInput style={styles.inputStyleLoop}
                     value={data[i]}
-                    key={i}
                     keyboardType='number-pad'
                     underlineColorAndroid="#f000"
                     placeholder="Enter Data"
                     placeholderTextColor="#8b9cb5"
                     autoCapitalize="sentences"
                     returnKeyType="next"
-                    editable={true}
-                    // onChangeText={(text) => handleTextChange(text, i, data)}
                     blurOnSubmit={false}>
                 </TextInput>
             )
@@ -197,15 +186,6 @@ const AddFdlKebisingan = ({ navigation }) => {
         setLoopData(body);
         setShowLoopData(true);
     }
-
-    const handleTextChange = (text, index, data) => {
-        // Update the data array with the edited text
-        console.log(data);
-        const newData = [...data];
-        newData[index] = text;
-        console.log(newData)
-        setCurrentInput(newData);
-      };
 
     const formatCoordinates = (latitude, longitude) => {
         const formatPart = (value, direction) => {
@@ -233,77 +213,30 @@ const AddFdlKebisingan = ({ navigation }) => {
 
     const handleInputChange = (input) => {
         const regex = /^\d+(\.\d{0,1})?$/;
-        if (regex.test(input) || input === '') {
-          setCurrentInput(input);
+        if (regex.test(input)) {
+            setCurrentInput(input);
         }
-      };
+    };
 
     const takePicture = async () => {
 
         if (camera) {
             const options = { quality: 0.5, base64: true, skipProcessing: true };
             const photo = await camera.takePictureAsync(options);
-
-            
             if (Cam == 1) {
                 setImage(photo.uri);
-                setFotoLok('data:image/jpeg;base64,'+base64Image);
-                storeSate({ foto_lok: 'data:image/jpeg;base64,'+base64Image});
             } else if (Cam == 2) {
                 setImageLain(photo.uri);
-                setFotoLain('data:image/jpeg;base64,'+base64Image);
-                storeSate({ foto_lain: 'data:image/jpeg;base64,'+base64Image});
             }
             if (photo.assets && photo.assets.length > 0) {
                 const selectedAsset = photo.assets[0];
+                console.log("Selected Asset URI:", selectedAsset.uri);
             }
-
-            const base64Image = await convertImageToBase64(photo.uri);
 
             closeCamera();
         }
         handleModal();
     };
-
-    const MAX_FILE_SIZE = 300 * 1024;
-
-    const convertImageToBase64 = async (imageUri) => {
-        try {
-          // Read the image file
-          const fileContent = await FileSystem.readAsStringAsync(imageUri, {
-            encoding: FileSystem.EncodingType.Base64,
-          });
-
-          const { width, height } = await ImageManipulator.manipulateAsync(
-            imageUri,
-            [],
-            { format: 'jpeg' } 
-          );
-
-          const scaleFactor = Math.min(1, MAX_FILE_SIZE / fileContent.length);
-          const newWidth = Math.floor(width * scaleFactor);
-          const newHeight = Math.floor(height * scaleFactor);
-
-          const resizedImage = await ImageManipulator.manipulateAsync(
-            imageUri,
-            [{ resize: { width: newWidth, height: newHeight } }],
-            { format: 'jpeg' } 
-          );
-
-          const resizedFileContent = await FileSystem.readAsStringAsync(
-            resizedImage.uri,
-            {
-              encoding: FileSystem.EncodingType.Base64,
-            }
-          );
-
-          console.log(resizedFileContent);
-    
-          return resizedFileContent;
-        } catch (error) {
-          console.error('Error converting image to base64:', error);
-        }
-      };
 
     const handleSubmitButton = () => {
         setErrortext("");
@@ -347,7 +280,6 @@ const AddFdlKebisingan = ({ navigation }) => {
                             setPenamaanTitik(responseJson.keterangan)
                             setShowForm(true);
                             setCameraVisible(true);
-                            storeSate({keterangan_4: responseJson.keterangan})
                         }
                     })
                     .catch((error) => {
@@ -397,7 +329,7 @@ const AddFdlKebisingan = ({ navigation }) => {
             setJamPengambilan(time);
       
             // Store the selected time
-            storeSate({ waktu: time });
+            storeSate({ waktu: formattedTime });
           }
 
     };
@@ -480,23 +412,12 @@ const AddFdlKebisingan = ({ navigation }) => {
             let location = await Location.getCurrentPositionAsync({});
             setLocation(location);
 
-            const lat = location.coords.latitude;
-            const longi = location.coords.longitude;
-
-            console.log(longi);
-            console.log(lat);
-
-            setLat(lat);
-            setLongi(longi);
-            storeSate({lat: lat});
-            storeSate({longi: longi})
-
+            // Set TitikKoordinatSampling with the obtained coordinates in the desired format
             const formattedCoordinates = formatCoordinates(
                 location.coords.latitude,
                 location.coords.longitude
             );
             setTitikKoordinatSampling(formattedCoordinates);
-            storeSate({posisi: formatCoordinates})
         } catch (error) {
             console.error("Error getting location:", error);
             setErrorMsg("Error getting location");
@@ -551,7 +472,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                             autoCapitalize="sentences"
                             returnKeyType="next"
                             blurOnSubmit={false}
-                            value={noSample}
+                            value={local.no_sample}
                         />
                     </View>
 
@@ -576,21 +497,20 @@ const AddFdlKebisingan = ({ navigation }) => {
                                 <Text style={styles.textLabel}>Penamaan Titik</Text>
                                 <TextInput
                                     style={styles.inputStyle}
-                                    onChangeText={(PenamaanTitik) => {
-                                        setPenamaanTitik(PenamaanTitik);
+                                    onChangeText={(PenamaanTitik) =>{
+                                        setKeterangan_4(PenamaanTitik)
                                         var val = new Object();
                                         val.keterangan_4 = PenamaanTitik;
-                                        storeSate(val);
+                                        storeSate(val)
                                     }}
-                                    value={penamaanTitik}
-                                    editable={true}
+                                    value={local.keterangan_4}
                                     underlineColorAndroid="#f000"
                                     placeholder="Enter Penamaan Titik"
                                     placeholderTextColor="#8b9cb5"
                                     autoCapitalize="sentences"
                                     returnKeyType="next"
                                     blurOnSubmit={false}
-/>
+                                />
                             </View>
                             <View style={styles.SectionStyle}>
                                 <Text style={styles.textLabel}>Penamaan Tambahan</Text>
@@ -609,8 +529,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                                     autoCapitalize="sentences"
                                     returnKeyType="next"
                                     blurOnSubmit={false}
-                                    value={isEditing ? local.penamaanTambahan : penamaanTambahan}
-                                    editable={true}
+                                    value={local.penamaanTambahan}
                                 />
                             </View>
                             <View style={styles.SectionStyle}>
@@ -618,8 +537,6 @@ const AddFdlKebisingan = ({ navigation }) => {
                                 <TextInput
                                     style={styles.inputStyle}
                                     onChangeText={(SumberKebisingan) => {
-                                        SumberKebisingan = SumberKebisingan || '';
-
                                         setSumberKebisingan(SumberKebisingan)
                                         var val = new Object();
                                         val.sumber_keb = SumberKebisingan;
@@ -632,8 +549,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                                     autoCapitalize="sentences"
                                     returnKeyType="next"
                                     blurOnSubmit={false}
-                                    value={isEditing ? local.sumber_keb : sumberKebisingan}
-                                    editable={true}
+                                    value={local.sumberKebisingan}
                                 />
                             </View>
                             <View style={styles.SectionStyle}>
@@ -692,7 +608,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                                             onChangeText={(JamPengambilan) => {
                                                 setJamPengambilan(JamPengambilan)
                                                 console.log(jamPengambilan)
-                                                storeSate({ jamPengambilan: JamPengambilan });
+                                                storeSate({ waktu: JamPengambilan });
                                             }
                                             }
                                             editable={false}
@@ -748,10 +664,10 @@ const AddFdlKebisingan = ({ navigation }) => {
                                             console.log(selectedItem.kategori)
                                             setKategoriPengujian(selectedItem.kategori)
                                             setShift_(selectedItem.shift)
-                                            var val = new Object();
-                                            val.jenis_durasi = selectedItem.kategori;
+                                            // var val = new Object();
+                                            // val.kategoriPengujian = selectedItem.kategori;
                                             // val.shift_ = selectedItem.shift;
-                                            storeSate(val)
+                                            // storeSate(val)
                                         }}
                                         buttonTextAfterSelection={(selectedItem, index) => {
                                             return selectedItem.kategori;
