@@ -114,12 +114,12 @@ const AddFdlKebisingan = ({ navigation }) => {
     })
 
     useEffect(() => {
-        console.log(local);
+        console.log(local, 'ambil pertama kali');
         (async () => {
             const { status } =
                 await ImagePicker.requestMediaLibraryPermissionsAsync();
             if (status !== "granted") {
-                alert("Sorry, we need camera roll permissions to make this work!");
+                Alert.alert("Sorry, we need camera roll permissions to make this work!");
             }
             const cameraStatus = await Camera.requestCameraPermissionsAsync();
             setCameraPermission(cameraStatus.status === "granted");
