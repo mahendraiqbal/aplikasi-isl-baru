@@ -208,34 +208,86 @@ import {
     SafeAreaView,
     StyleSheet,
     Image,
+    Alert
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNetInfo } from "@react-native-community/netinfo";
+import Loader from "../../../components/Loader";
 
 const HomeFdlKebisingan = ({ navigation }) => {
     const [timeNow, setTimeNow] = useState(new Date());
     const [accessData, setAccessData] = useState("");
+    const [errorMsg, setErrorMsg] = useState(null);
+    const netInfo = useNetInfo();
+    const [loading, setLoading] = useState(false);
+    const [errortext, setErrortext] = useState("");
 
     useEffect(() => {
         const interval = setInterval(() => {
             setTimeNow(new Date());
         }, 1000);
 
-        const fetchAccessData = async () => {
-            try {
-                const accessValue = await AsyncStorage.getItem("access");
-                if (accessValue !== null) {
-                    const accessDataObject = JSON.parse(accessValue);
-
-                    const identity = accessDataObject?.identity || "";
-
-                    setAccessData(identity);
-                }
-            } catch (error) {
-                console.error("Error fetching access data:", error);
+        AsyncStorage.getItem('access').then((value) => {
+            var token = JSON.parse(value)
+            if (new Date() >= new Date(token.expired)) {
+                Alert.alert(
+                    'Token has been Expired.!',
+                    'Please Online to Re-Login',
+                    [
+                        {
+                            text: 'Ok',
+                            onPress: () => {
+                                AsyncStorage.removeItem('token');
+                                props.navigation.replace('Auth');
+                            },
+                        },
+                    ],
+                    { cancelable: false },
+                );
             }
-        };
+        });
 
-        fetchAccessData();
+        AsyncStorage.getItem("token").then((token) => {
+            setLoading(true);
+
+            var dataToSend = {
+                token: token,
+            };
+            let formBody = [];
+            for (let key in dataToSend) {
+                let encodedKey = encodeURIComponent(key);
+                let encodedValue = encodeURIComponent(dataToSend[key]);
+                formBody.push(encodedKey + "=" + encodedValue);
+            }
+
+            formBody = formBody.join("&");
+
+            fetch(
+                "https://apps.intilab.com/eng/backend/public/default/api/cektoken",
+                {
+                    method: "POST",
+                    body: JSON.stringify(dataToSend),
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            )
+                .then((response) => response.json())
+                .then((responseJson) => {
+                    setLoading(false);
+                    console.log(responseJson)
+                    if (responseJson.status != 200) {
+                        setErrortext(responseJson.message);
+                    } else {
+                        setAccessData(responseJson.name);
+                    }
+                })
+                .catch((error) => {
+                    setLoading(false);
+                    console.error(error);
+                    Alert.alert(error);
+                });
+        });
 
         return () => clearInterval(interval);
     }, []);
@@ -256,19 +308,20 @@ const HomeFdlKebisingan = ({ navigation }) => {
 
     return (
         <View style={styles.root}>
+            <Loader loading={loading} />
             <View style={styles.container}>
                 {/* zIndex: 0 */}
                 <View style={styles.sheet} >
                     <Text style={styles.greetingText}>{greeting}</Text>
                     <Text style={[styles.userNameText, { borderBottomWidth: 1, borderBottomColor: "rgb(48, 126, 204)" }]}>{`${accessData}`}</Text>
                     <View style={styles.allData}>
-                        <View style={{alignItems: "center", justifyContent:"center"}}>
+                        <View style={{ alignItems: "center", justifyContent: "center" }}>
                             <TouchableOpacity style={styles.buttonOffline}>
                                 <Text style={{ fontSize: 20, fontWeight: "bold", color: '#fff' }}>0</Text>
                             </TouchableOpacity>
                             <Text style={styles.buttonText}>Data Offline</Text>
                         </View>
-                        <View style={{alignItems: "center", justifyContent: "center"}}>
+                        <View style={{ alignItems: "center", justifyContent: "center" }}>
                             <TouchableOpacity style={styles.button}>
                                 <Text style={{ fontSize: 20, fontWeight: "bold", color: '#fff' }}>0</Text>
                             </TouchableOpacity>
@@ -310,6 +363,7 @@ const styles = StyleSheet.create({
         height: '100%',
         width: '100%',
         borderRadius: 15,
+        padding: 10
         // flexDirection: "row",
         // justifyContent: "space-around"
     },
@@ -327,23 +381,27 @@ const styles = StyleSheet.create({
         justifyContent: "space-around",
     },
     button: {
-        backgroundColor : '#FF396F',
+        backgroundColor: '#FF396F',
         borderWidth: 1,
         borderColor: "#FF396F", // You can set the border color to your preference
         borderRadius: 15,
         padding: 8,
         alignItems: "center",
-        width: 50
+        width: 50,
+        height: 50,
+        justifyContent: "center"
     },
 
     buttonOffline: {
-        backgroundColor : '#00B4FF',
+        backgroundColor: '#00B4FF',
         borderWidth: 1,
         borderColor: "#00B4FF", // You can set the border color to your preference
         borderRadius: 15,
         padding: 8,
         alignItems: "center",
-        width: 50
+        width: 50,
+        height: 50,
+        justifyContent: "center"
     },
 
     buttonText: {
