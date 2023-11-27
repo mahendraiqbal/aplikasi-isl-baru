@@ -244,50 +244,47 @@ const HomeFdlKebisingan = ({ navigation }) => {
                     ],
                     { cancelable: false },
                 );
-            }
-        });
-
-        AsyncStorage.getItem("token").then((token) => {
-            setLoading(true);
-
-            var dataToSend = {
-                token: token,
-            };
-            let formBody = [];
-            for (let key in dataToSend) {
-                let encodedKey = encodeURIComponent(key);
-                let encodedValue = encodeURIComponent(dataToSend[key]);
-                formBody.push(encodedKey + "=" + encodedValue);
-            }
-
-            formBody = formBody.join("&");
-
-            fetch(
-                "https://apps.intilab.com/eng/backend/public/default/api/cektoken",
-                {
-                    method: "POST",
-                    body: JSON.stringify(dataToSend),
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
+            } else {
+                var dataToSend = {
+                    token: token.token,
+                };
+                let formBody = [];
+                for (let key in dataToSend) {
+                    let encodedKey = encodeURIComponent(key);
+                    let encodedValue = encodeURIComponent(dataToSend[key]);
+                    formBody.push(encodedKey + "=" + encodedValue);
                 }
-            )
-                .then((response) => response.json())
-                .then((responseJson) => {
-                    setLoading(false);
-                    console.log(responseJson)
-                    if (responseJson.status != 200) {
-                        setErrortext(responseJson.message);
-                    } else {
-                        setAccessData(responseJson.name);
+    
+                formBody = formBody.join("&");
+    
+                fetch(
+                    "https://apps.intilab.com/eng/backend/public/default/api/cektoken",
+                    {
+                        method: "POST",
+                        body: JSON.stringify(dataToSend),
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
                     }
-                })
-                .catch((error) => {
-                    setLoading(false);
-                    console.error(error);
-                    Alert.alert(error);
-                });
+                )
+                    .then((response) => response.json())
+                    .then((responseJson) => {
+                        setLoading(false);
+                        console.log(responseJson)
+                        if (responseJson.status != 200) {
+                            setErrortext(responseJson.message);
+                        } else {
+                            setAccessData(responseJson.name);
+                        }
+                    })
+                    .catch((error) => {
+                        setLoading(false);
+                        console.error(error);
+                        Alert.alert(error);
+                    });
+            }
         });
+
 
         return () => clearInterval(interval);
     }, []);
