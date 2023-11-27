@@ -189,7 +189,7 @@ const AddFdlKebisingan = ({ navigation }) => {
                     autoCapitalize="sentences"
                     returnKeyType="next"
                     editable={true}
-                    // onChangeText={(text) => handleTextChange(text, i, data)}
+                    onChangeText={(text) => handleTextChange(text, i, data)}
                     blurOnSubmit={false}>
                 </TextInput>
             )

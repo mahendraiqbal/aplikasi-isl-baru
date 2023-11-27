@@ -255,73 +255,71 @@ const HomeFdlKebisingan = ({ navigation }) => {
     useEffect(() => { });
 
     return (
-        <SafeAreaView style={{ flex: 1 }}>
-            {/* <View style={{ flex: 1, padding: 16 }}>
-                <View
-                    style={{
-                        flex: 1,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}>
-                    <Text
-                        style={{
-                            fontSize: 25,
-                            textAlign: 'center',
-                            marginBottom: 16,
-                        }}>
-                        HOME FDL KEBISINGAN
-                    </Text>
-                    <TouchableOpacity onPress={() => {
-                        AsyncStorage.removeItem('kebisingan');
-                    }}>
-                        <Text>Remove</Text>
-                    </TouchableOpacity>
-                </View>
-            </View> */}
+        <View style={styles.root}>
             <View style={styles.container}>
-                <Text style={styles.greetingText}>{greeting}</Text>
-                <Text style={styles.userNameText}>{`${accessData}`}</Text>
+                {/* zIndex: 0 */}
+                <View style={styles.sheet} >
+                    <Text style={styles.greetingText}>{greeting}</Text>
+                    <Text style={[styles.userNameText, { borderBottomWidth: 1, borderBottomColor: "rgb(48, 126, 204)" }]}>{`${accessData}`}</Text>
+                    <View style={styles.allData}>
+                        <View style={{alignItems: "center", justifyContent:"center"}}>
+                            <TouchableOpacity style={styles.buttonOffline}>
+                                <Text style={{ fontSize: 20, fontWeight: "bold", color: '#fff' }}>0</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.buttonText}>Data Offline</Text>
+                        </View>
+                        <View style={{alignItems: "center", justifyContent: "center"}}>
+                            <TouchableOpacity style={styles.button}>
+                                <Text style={{ fontSize: 20, fontWeight: "bold", color: '#fff' }}>0</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.buttonText}>Data Error</Text>
+                        </View>
+                    </View>
 
-                <View style={styles.allData}>
-                    <View>
-                        <TouchableOpacity style={styles.button}>
-                            <Image
-                                source={require("../../../../assets/data.png")}
-                                style={styles.icon}
-                            />
-                        </TouchableOpacity>
-                        <Text style={styles.buttonText}>Data Online</Text>
-                    </View>
-                    <View>
-                        <TouchableOpacity style={styles.button}>
-                            {/* <Image
-                source={require("../../../../assets/data.png")}
-                style={styles.icon}
-              /> */}
-                            <Text style={{ fontSize: 43, fontWeight: "bold" }}>0</Text>
-                        </TouchableOpacity>
-                        <Text style={styles.buttonText}>Data Offline</Text>
-                    </View>
                 </View>
             </View>
-        </SafeAreaView>
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
+
+    root: {
+        flex: 1,
+        backgroundColor: '#fff',
+    },
+    container: {
+        height: 200,
+        width: '100%',
+        backgroundColor: 'rgb(48,126,204)',
+        padding: 16,
+        borderWidth: 1,
+        borderColor: 'rgb(48,126,204)',
+    },
+    item: {
+        borderWidth: 4,
+        borderColor: 'rgba(0,0,0,0.2)',
+        height: 48,
+        width: 48,
+        borderRadius: 8,
+    },
+    sheet: {
+        borderWidth: 4,
+        borderColor: '#fff',
+        backgroundColor: '#fff',
+        height: '100%',
+        width: '100%',
+        borderRadius: 15,
+        // flexDirection: "row",
+        // justifyContent: "space-around"
+    },
+
     greetingText: {
         fontSize: 18,
     },
     userNameText: {
-        fontSize: 40,
+        fontSize: 30,
         fontWeight: "bold",
-    },
-    container: {
-        borderWidth: 1,
-        borderColor: "gray",
-        borderRadius: 10,
-        padding: 16,
-        margin: 16,
     },
     allData: {
         marginTop: 16,
@@ -329,16 +327,27 @@ const styles = StyleSheet.create({
         justifyContent: "space-around",
     },
     button: {
+        backgroundColor : '#FF396F',
         borderWidth: 1,
-        borderColor: "black", // You can set the border color to your preference
-        borderRadius: 8,
+        borderColor: "#FF396F", // You can set the border color to your preference
+        borderRadius: 15,
         padding: 8,
         alignItems: "center",
-        // width: "45%", // Adjust the width as needed
+        width: 50
     },
+
+    buttonOffline: {
+        backgroundColor : '#00B4FF',
+        borderWidth: 1,
+        borderColor: "#00B4FF", // You can set the border color to your preference
+        borderRadius: 15,
+        padding: 8,
+        alignItems: "center",
+        width: 50
+    },
+
     buttonText: {
-        fontSize: 16,
-        fontWeight: "bold",
+        fontSize: 14,
         color: "black", // You can set the text color to your preference
         textAlign: "center"
     },
