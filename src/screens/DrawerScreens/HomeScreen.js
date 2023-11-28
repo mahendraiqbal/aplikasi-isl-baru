@@ -16,6 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Carousel from "react-native-reanimated-carousel";
 
 import { Link } from "@react-navigation/native";
+import FDLKebisinganStack from '../DrawerNavigationRoutes/index';
 
 const HomeScreen = () => {
   const netInfo = useNetInfo();
@@ -64,7 +65,7 @@ const HomeScreen = () => {
       <View style={styles.iconRow}>
         <TouchableOpacity
           style={styles.iconContainer}
-          onPress={() => navigation.navigate("HomeScreenStack")}
+          onPress={() => navigation.navigate("FdlKebisinganScreen")}
         >
           <Image
             source={require("../../../assets/plus.png")}
@@ -128,11 +129,11 @@ const HomeScreen = () => {
           >
             Test halaman dashboard
           </Text> */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() => navigation.navigate("FdlKebisinganScreen")}
           >
             <Text>Kebisingan</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </View>
     </SafeAreaView>

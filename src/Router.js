@@ -12,6 +12,7 @@ import SplashScreen from './screens/SplashScreen';
 import LoginScreen from './screens/Login';
 import DrawerNavigationRoutes from './screens/DrawerNavigationRoutes';
 import Limbah from './screens/DrawerScreens/AIR/Limbah';
+import FdlKebisinganScreen from './screens/DrawerScreens/FdlKebisinganScreen';
 // import Tabs from './Screen/DrawerScreens/FdlAirCreen';
 
 const Stack = createStackNavigator();
@@ -38,13 +39,16 @@ const App = () => {
                     // Hiding header for Splash Screen
                     options={{ headerShown: false }}
                 />
-                {/* Auth Navigator: Include Login and Signup */}
                 <Stack.Screen
                     name="Auth"
                     component={Auth}
                     options={{ headerShown: false }}
                 />
-                {/* Navigation Drawer as a landing page */}
+                <Stack.Screen
+                    name="FdlKebisinganScreen"
+                    component={FdlKebisinganScreen}
+                    options={{ headerShown: false }}
+                />
                 <Stack.Screen
                     name="DrawerNavigationRoutes"
                     component={DrawerNavigationRoutes}

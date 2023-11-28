@@ -304,6 +304,9 @@ const HomeFdlKebisingan = ({ navigation }) => {
           </View>
         </View>
       </View>
+      <TouchableOpacity onPress={() => AsyncStorage.removeItem('kebisingan')}>
+                    <Text>Remove Storage</Text>
+                </TouchableOpacity> 
     </SafeAreaView>
   );
 };

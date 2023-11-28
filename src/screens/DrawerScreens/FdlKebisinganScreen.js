@@ -1,7 +1,8 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
+import stateStorageKebisingan from '../../components/stateStorageKebisingan';
 import DataFdlKebisingan from './Kebisingan/DataFdlKebisingan';
 import HomeFdlKebisingan from './Kebisingan/HomeFdlKebisingan';
 import AddFdlKebisingan from './Kebisingan/AddFdlKebisingan';
@@ -31,6 +32,8 @@ const CustomTabBarButton = ({children, onPress}) => (
 )
 
 const FdlKebisinganScreen = () => {
+    // const local = stateStorageKebisingan("kebisingan");
+    // console.log('cerele', local)
     return (
         <Tab.Navigator
             screenOptions={{
