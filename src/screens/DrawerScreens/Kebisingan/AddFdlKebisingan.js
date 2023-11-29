@@ -34,9 +34,10 @@ import DataFormFdl from "../../../components/DataFormFdl";
 import stateStorageKebisingan from "../../../components/stateStorageKebisingan";
 
 const AddFdlKebisingan = ({ navigation }) => {
-  const local = stateStorageKebisingan("kebisingan");
   const { storage, storeSate } = stateStorageKebisingan("kebisingan");
   const netInfo = useNetInfo();
+  const jenisFdl = ["kebisingan", "air"];
+  const [selectedJenisFdl, setSelectedJenisFdl] = useState(jenisFdl[0]);
   const [noSample, setNosample] = useState(storage.no_sample);
   const [penamaanTitik, setPenamaanTitik] = useState(storage.keterangan_4);
   const [penamaanTambahan, setPenamaanTambahan] = useState(
@@ -103,26 +104,27 @@ const AddFdlKebisingan = ({ navigation }) => {
   useEffect(() => {
     // Update the state when the data is fetched
     setNosample(storage.no_sample);
-    setPenamaanTambahan(storage.penamaanTambahan)
-    setSumberKebisingan(storage.sumber_keb)
-    setJenisFrekuensi(storage.jen_frek)
-    setTitikKoordinatSampling(storage.posisi)
-    setJamPengambilan(storage.waktu)
-    setJenisPengujian(storage.jenisPengujian)
-    setKategoriPengujian(storage.jenis_durasi)
-    setShiftPengambilan(storage.shiftPengambilan)
-    setShift_(storage.shift_)
-    setSuhuUdara(storage.suhu_udara)
-    setKelembapanUdara(storage.kelembapan_udara)
-    setLat(storage.lat)
-    setLongi(storage.longi)
-    setFotoLain(storage.foto_lain)
-    setFotoLok(storage.foto_lok)
-    
+    setPenamaanTitik(storage.keterangan_4)
+    setPenamaanTambahan(storage.penamaanTambahan);
+    setSumberKebisingan(storage.sumber_keb);
+    setJenisFrekuensi(storage.jen_frek);
+    setTitikKoordinatSampling(storage.posisi);
+    setJamPengambilan(storage.waktu);
+    setJenisPengujian(storage.jenisPengujian);
+    setKategoriPengujian(storage.jenis_durasi);
+    setShiftPengambilan(storage.shiftPengambilan);
+    setShift_(storage.shift_);
+    setSuhuUdara(storage.suhu_udara);
+    setKelembapanUdara(storage.kelembapan_udara);
+    setLat(storage.lat);
+    setLongi(storage.longi);
+    setFotoLain(storage.foto_lain);
+    setFotoLok(storage.foto_lok);
   }, [
-    storage.no_sample, 
-    storage.penamaanTambahan, 
-    storage.sumber_keb, 
+    storage.no_sample,
+    storage.keterangan_4,
+    storage.penamaanTambahan,
+    storage.sumber_keb,
     storage.jen_frek,
     storage.posisi,
     storage.waktu,
@@ -135,10 +137,10 @@ const AddFdlKebisingan = ({ navigation }) => {
     storage.lat,
     storage.longi,
     storage.foto_lain,
-    storage.foto_lok
-]);
+    storage.foto_lok,
+  ]);
 
-  console.log('cek', noSample);
+  console.log("cek", noSample);
 
   useEffect(() => {
     AsyncStorage.getItem("access").then((value) => {
@@ -204,9 +206,9 @@ const AddFdlKebisingan = ({ navigation }) => {
     }
   };
 
-//   const storeSate = async (data) => {
-//     local.storeSate(data);
-//   };
+  //   const storeSate = async (data) => {
+  //     local.storeSate(data);
+  //   };
 
   const RenderInput = async (data) => {
     var body = [];
@@ -380,10 +382,10 @@ const AddFdlKebisingan = ({ navigation }) => {
               setErrortext(responseJson.message);
             } else {
               console.log(responseJson);
-            //   setPenamaanTitik(responseJson.keterangan);
+                setPenamaanTitik(responseJson.keterangan);
               setShowForm(true);
               setCameraVisible(true);
-            //   storeSate({ keterangan_4: responseJson.keterangan });
+                storeSate({ keterangan_4: responseJson.keterangan });
             }
           })
           .catch((error) => {
@@ -502,8 +504,8 @@ const AddFdlKebisingan = ({ navigation }) => {
       const lat = location.coords.latitude;
       const longi = location.coords.longitude;
 
-    //   console.log(longi);
-    //   console.log(lat);
+      console.log(longi);
+      console.log(lat);
 
       setLat(lat);
       setLongi(longi);
@@ -571,7 +573,8 @@ const AddFdlKebisingan = ({ navigation }) => {
   return (
     <>
       <DataFormFdl
-        jenisFdl="kebisingan"
+        jenisFdl={selectedJenisFdl}
+        storage={storage}
         storeSate={storeSate}
         Calculate={Calculate}
         RenderInput={RenderInput}

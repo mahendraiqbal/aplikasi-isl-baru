@@ -169,12 +169,6 @@ const DataFormFdl = ({
                   <Text style={styles.textLabel}>Penamaan Titik</Text>
                   <TextInput
                     style={styles.inputStyle}
-                    // onChangeText={(PenamaanTitik) => {
-                    //   setPenamaanTitik(PenamaanTitik);
-                    //   var val = new Object();
-                    //   val.keterangan_4 = PenamaanTitik;
-                    //   storeSate(val);
-                    // }}
                     onChangeText={(PenamaanTitik) => {
                         setPenamaanTitik(PenamaanTitik);
                         var val = new Object();
@@ -247,6 +241,7 @@ const DataFormFdl = ({
                     defaultButtonText={"Select Frekuensi"}
                     buttonStyle={styles.inputStyle}
                     buttonTextStyle={{ fontSize: 16 }}
+                    defaultValue={jenisFrekunsi}
                   />
                 </View>
                 <View>
@@ -342,6 +337,7 @@ const DataFormFdl = ({
                       defaultButtonText={"Select Jenis Pengujian"}
                       buttonStyle={styles.inputStyle}
                       buttonTextStyle={{ fontSize: 16 }}
+                      defaultValue={jenisPengujian}
                     />
                   </View>
                 </View>
@@ -363,6 +359,7 @@ const DataFormFdl = ({
                         storeSate(val);
                       }}
                       buttonTextAfterSelection={(selectedItem, index) => {
+                        console.log('well', selectedItem)
                         return selectedItem.kategori;
                       }}
                       rowTextForSelection={(item, index) => {
@@ -371,6 +368,7 @@ const DataFormFdl = ({
                       defaultButtonText={"Select Jenis Pengujian"}
                       buttonStyle={styles.inputStyle}
                       buttonTextStyle={{ fontSize: 15 }}
+                    //   defaultValue={selectedItem.kategori}
                     />
                   </View>
                   <View style={styles.SectionStyleRow}>
@@ -389,6 +387,7 @@ const DataFormFdl = ({
                       defaultButtonText={"Select Shift"}
                       buttonStyle={styles.inputStyle}
                       buttonTextStyle={{ fontSize: 15 }}
+                      defaultValue={shiftPengambilan}
                     />
                   </View>
                 </View>
@@ -411,6 +410,7 @@ const DataFormFdl = ({
                       autoCapitalize="sentences"
                       returnKeyType="next"
                       blurOnSubmit={false}
+                      value={suhuUdara}
                     />
                   </View>
                   <View style={styles.SectionStyleRow}>
@@ -430,6 +430,7 @@ const DataFormFdl = ({
                       autoCapitalize="sentences"
                       returnKeyType="next"
                       blurOnSubmit={false}
+                      value={kelembapanUdara}
                     />
                   </View>
                 </View>
