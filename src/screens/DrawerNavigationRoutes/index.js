@@ -91,6 +91,8 @@ const FdlKebisinganStack = ({ navigation }) => {
     
     this.stateForm = stateStorageKebisingan('kebisingan')
 
+    console.log('test', this.stateForm)
+
     return (
         <Stack.Navigator
             initialRouteName="FdlKebisinganScreen"
