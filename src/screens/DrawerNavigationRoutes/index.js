@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { createStackNavigator } from '@react-navigation/stack';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import RightIcon from '../../components/RightIcon';
@@ -12,6 +12,9 @@ import CustomSidebarMenu from '../../components/CustomSidebarMenu';
 import NavigationDrawerHeader from '../../components/NavigationDrawerHeader';
 
 import Limbah from '../DrawerScreens/AIR/Limbah';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import stateStorageKebisingan from '../../components/stateStorageKebisingan';
 
 
 const Stack = createStackNavigator();
@@ -29,7 +32,7 @@ const HomeScreenStack = ({ navigation }) => {
                         <NavigationDrawerHeader navigationProps={navigation} />
                     ),
                     headerRight: () => (
-                        <RightIcon navigationProps={navigation}/>
+                        <RightIcon navigationProps={navigation} />
                     ),
                     headerStyle: {
                         backgroundColor: '#307ecc', //Set Header color
@@ -54,7 +57,7 @@ const FdlAirStack = ({ navigation }) => {
                     <NavigationDrawerHeader navigationProps={navigation} />
                 ),
                 headerRight: () => (
-                    <RightIcon navigationProps={navigation}/>
+                    <RightIcon navigationProps={navigation} />
                 ),
                 headerStyle: {
                     backgroundColor: '#307ecc', //Set Header color
@@ -85,6 +88,8 @@ const FdlAirStack = ({ navigation }) => {
 };
 
 const FdlKebisinganStack = ({ navigation }) => {
+    
+    this.stateForm = stateStorageKebisingan('kebisingan')
 
     return (
         <Stack.Navigator
@@ -94,7 +99,7 @@ const FdlKebisinganStack = ({ navigation }) => {
                     <NavigationDrawerHeader navigationProps={navigation} />
                 ),
                 headerRight: () => (
-                    <RightIcon navigationProps={navigation}/>
+                    <RightIcon navigationProps={navigation} />
                 ),
                 headerStyle: {
                     backgroundColor: '#307ecc', //Set Header color

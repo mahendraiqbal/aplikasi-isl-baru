@@ -200,41 +200,157 @@
 // });
 
 // import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
     View,
     Text,
     TouchableOpacity,
     SafeAreaView,
+    StyleSheet,
+    Image,
+    Alert
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import Loader from "../../../components/Loader";
 
-const HomeFdlKebisingan = ({ navigation }) => {
+const HomeFdlKebisingan = ({navigation}) => {
+    
+    const [timeNow, setTimeNow] = useState(new Date());
+    const [accessData, setAccessData] = useState("");
+    const [errorMsg, setErrorMsg] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [errortext, setErrortext] = useState("");
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setTimeNow(new Date());
+        }, 1000);
+
+        setAccessData(this.nama)
+
+        return () => clearInterval(interval);
+    }, []);
+
+    let greeting;
+
+    if (timeNow.getHours() < 12) {
+        greeting = "Selamat Pagi";
+    } else if (timeNow.getHours() < 15) {
+        greeting = "Selamat Siang";
+    } else if (timeNow.getHours() < 18) {
+        greeting = "Selamat Sore";
+    } else {
+        greeting = "Selamat Malam";
+    }
+
+    useEffect(() => { });
+
     return (
-        <SafeAreaView style={{ flex: 1 }}>
-            <View style={{ flex: 1, padding: 16 }}>
-                <View
-                    style={{
-                        flex: 1,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}>
-                    <Text
-                        style={{
-                            fontSize: 25,
-                            textAlign: 'center',
-                            marginBottom: 16,
-                        }}>
-                        HOME FDL KEBISINGAN
-                    </Text>
-                    <TouchableOpacity onPress={() => {
-                        AsyncStorage.removeItem('kebisingan');
-                    }}>
-                        <Text>Remove</Text>
-                    </TouchableOpacity>
+        <View style={styles.root}>
+            <Loader loading={loading} />
+            <View style={styles.container}>
+                {/* zIndex: 0 */}
+                <View style={styles.sheet} >
+                    <Text style={styles.greetingText}>{greeting}</Text>
+                    <Text style={[styles.userNameText, { borderBottomWidth: 1, borderBottomColor: "rgb(48, 126, 204)" }]}>{`${accessData}`}</Text>
+                    <View style={styles.allData}>
+                        <View style={{ alignItems: "center", justifyContent: "center" }}>
+                            <TouchableOpacity style={styles.buttonOffline}>
+                                <Text style={{ fontSize: 20, fontWeight: "bold", color: '#fff' }}>0</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.buttonText}>Data Offline</Text>
+                        </View>
+                        <View style={{ alignItems: "center", justifyContent: "center" }}>
+                            <TouchableOpacity style={styles.button}>
+                                <Text style={{ fontSize: 20, fontWeight: "bold", color: '#fff' }}>0</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.buttonText}>Data Error</Text>
+                        </View>
+                    </View>
+
                 </View>
             </View>
-        </SafeAreaView>
+        </View>
     );
-}
+};
+
+const styles = StyleSheet.create({
+
+    root: {
+        flex: 1,
+        backgroundColor: '#fff',
+    },
+    container: {
+        height: 200,
+        width: '100%',
+        backgroundColor: 'rgb(48,126,204)',
+        padding: 16,
+        borderWidth: 1,
+        borderColor: 'rgb(48,126,204)',
+    },
+    item: {
+        borderWidth: 4,
+        borderColor: 'rgba(0,0,0,0.2)',
+        height: 48,
+        width: 48,
+        borderRadius: 8,
+    },
+    sheet: {
+        borderWidth: 4,
+        borderColor: '#fff',
+        backgroundColor: '#fff',
+        height: '100%',
+        width: '100%',
+        borderRadius: 15,
+        padding: 10
+        // flexDirection: "row",
+        // justifyContent: "space-around"
+    },
+
+    greetingText: {
+        fontSize: 18,
+    },
+    userNameText: {
+        fontSize: 30,
+        fontWeight: "bold",
+    },
+    allData: {
+        marginTop: 16,
+        flexDirection: "row",
+        justifyContent: "space-around",
+    },
+    button: {
+        backgroundColor: '#FF396F',
+        borderWidth: 1,
+        borderColor: "#FF396F", // You can set the border color to your preference
+        borderRadius: 15,
+        padding: 8,
+        alignItems: "center",
+        width: 50,
+        height: 50,
+        justifyContent: "center"
+    },
+
+    buttonOffline: {
+        backgroundColor: '#00B4FF',
+        borderWidth: 1,
+        borderColor: "#00B4FF", // You can set the border color to your preference
+        borderRadius: 15,
+        padding: 8,
+        alignItems: "center",
+        width: 50,
+        height: 50,
+        justifyContent: "center"
+    },
+
+    buttonText: {
+        fontSize: 14,
+        color: "black", // You can set the text color to your preference
+        textAlign: "center"
+    },
+    icon: {
+        width: 50, // Set your desired icon width
+        height: 50, // Set your desired icon height
+    },
+});
 
 export default HomeFdlKebisingan;

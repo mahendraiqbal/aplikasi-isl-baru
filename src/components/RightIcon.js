@@ -16,8 +16,10 @@ const RightIcon = (props) => {
     useEffect(() => {
         if (netInfo.isConnected && netInfo.isInternetReachable) {
             setConnection('Online')
+            this.connection = true
         } else {
             setConnection('Offline')
+            this.connection = false
         }
 
         AsyncStorage.getItem('access').then((value) => {

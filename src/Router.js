@@ -50,11 +50,11 @@ const App = () => {
                     component={DrawerNavigationRoutes}
                     options={{ headerShown: false }}
                 />
-                <Stack.Screen
+                {/* <Stack.Screen
                     name="Limbah"
                     component={Limbah}
                     options={{ headerShown: false }}
-                />
+                /> */}
             </Stack.Navigator>
     );
 };

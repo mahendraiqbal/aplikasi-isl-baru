@@ -29,11 +29,11 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import { Icon, IconButton, MD3Colors } from "react-native-paper";
 import DateTimePicker from '@react-native-community/datetimepicker';
 
-const AddFdlKebisingan = () => {
-    // console.log(navigation.getState)
-    const local = this.stateForm;
-    const netInfo = useNetInfo();
+import stateStorage from "../../../components/stateStorageKebisingan";
 
+const AddFdlKebisinganBackup = ({ navigation }) => {
+    const local = stateStorage('kebisingan');
+    const netInfo = useNetInfo();
     const [noSample, setNosample] = useState(local.no_sample);
     const [penamaanTitik, setPenamaanTitik] = useState(local.keterangan_4);
     const [penamaanTambahan, setPenamaanTambahan] = useState(local.penamaanTambahan);
@@ -51,7 +51,7 @@ const AddFdlKebisingan = () => {
     const [longi, setLongi] = useState(local.longi);
     const [fotoLain, setFotoLain] = useState(local.foto_lain);
     const [fotoLok, setFotoLok] = useState(local.foto_lok);
-
+    
     const [isEditing, setIsEditing] = useState(false);
 
     const [dataArray, setDataArray] = useState([]);
@@ -88,13 +88,13 @@ const AddFdlKebisingan = () => {
 
     const kategoriPengujianRef = useRef();
 
+    
 
-
-    useEffect(() => {
-
+    useEffect(()=>{
+        
         AsyncStorage.getItem('access').then((value) => {
             var token = JSON.parse(value)
-            if (new Date() >= new Date(token.expired)) {
+            if(new Date() >= new Date(token.expired)){
                 Alert.alert(
                     'Token has been Expired.!',
                     'Please Online to Re-Login',
@@ -114,15 +114,12 @@ const AddFdlKebisingan = () => {
     })
 
     useEffect(() => {
-        if (local.no_sample != "") {
-            setShowForm(true);
-            setCameraVisible(true);
-        }
+        console.log(local);
         (async () => {
             const { status } =
                 await ImagePicker.requestMediaLibraryPermissionsAsync();
             if (status !== "granted") {
-                Alert.alert("Sorry, we need camera roll permissions to make this work!");
+                alert("Sorry, we need camera roll permissions to make this work!");
             }
             const cameraStatus = await Camera.requestCameraPermissionsAsync();
             setCameraPermission(cameraStatus.status === "granted");
@@ -145,7 +142,7 @@ const AddFdlKebisingan = () => {
                     setDataArray((prevData) => [...prevData, currentInput]);
                     setSec(dataArray.length + 2);
                     setCurrentInput("");
-                    storeSate({ kebisingan: (prevData) => [...prevData, currentInput] })
+                    storeSate({kebisingan: (prevData) => [...prevData, currentInput]})
                 }
             }
         }, 5000);
@@ -153,31 +150,19 @@ const AddFdlKebisingan = () => {
     }, [currentInput, dataArray]);
 
     const Calculate = async () => {
-        if (dataArray.length == 5) {
+        if (dataArray.length == 3) {
             setShowData_(false)
             RenderInput(dataArray)
         }
-
+    
     }
-
+    
     const storeSate = async (data) => {
-        try {
-            AsyncStorage.getItem('kebisingan').then((value) => {
-                let array = JSON.parse(value)
-                array = { ...array, ...data }
-
-                AsyncStorage.setItem('kebisingan', JSON.stringify(array));
-                AsyncStorage.getItem('kebisingan').then((item) => {
-                    console.log(item)
-                })
-            })
-        } catch (error) {
-            Alert.alert('Can not Sync..')
-        }
-    }
+        local.storeSate(data);
+      };
+      
 
     const RenderInput = async (data) => {
-        console.log(data);
         var body = [];
         body.push(<Text style={styles.textLabelLoop}>Data Kebisingan</Text>)
         for (let i = 0; i < data.length; i++) {
@@ -203,12 +188,15 @@ const AddFdlKebisingan = () => {
 
     const handleTextChange = (text, index, data) => {
         // Update the data array with the edited text
-        console.log(data);
+
+        setCurrentInput('');
         const newData = [...data];
         newData[index] = text;
-        console.log(newData)
-        setCurrentInput(newData);
-    };
+        console.log(newData);
+      
+        // Assuming currentInput is a state variable
+        setCurrentInput(newData.join('')); // Join the array into a string if needed
+      };
 
     const formatCoordinates = (latitude, longitude) => {
         const formatPart = (value, direction) => {
@@ -237,25 +225,25 @@ const AddFdlKebisingan = () => {
     const handleInputChange = (input) => {
         const regex = /^\d+(\.\d{0,1})?$/;
         if (regex.test(input) || input === '') {
-            setCurrentInput(input);
+          setCurrentInput(input);
         }
-    };
+      };
 
     const takePicture = async () => {
 
         if (camera) {
             const options = { quality: 0.5, base64: true, skipProcessing: true };
             const photo = await camera.takePictureAsync(options);
-            closeCamera();
-            handleModal();
+
+            
             if (Cam == 1) {
                 setImage(photo.uri);
-                setFotoLok('data:image/jpeg;base64,' + base64Image);
-                storeSate({ foto_lok: 'data:image/jpeg;base64,' + base64Image });
+                setFotoLok('data:image/jpeg;base64,'+base64Image);
+                storeSate({ foto_lok: 'data:image/jpeg;base64,'+base64Image});
             } else if (Cam == 2) {
                 setImageLain(photo.uri);
-                setFotoLain('data:image/jpeg;base64,' + base64Image);
-                storeSate({ foto_lain: 'data:image/jpeg;base64,' + base64Image });
+                setFotoLain('data:image/jpeg;base64,'+base64Image);
+                storeSate({ foto_lain: 'data:image/jpeg;base64,'+base64Image});
             }
             if (photo.assets && photo.assets.length > 0) {
                 const selectedAsset = photo.assets[0];
@@ -263,50 +251,50 @@ const AddFdlKebisingan = () => {
 
             const base64Image = await convertImageToBase64(photo.uri);
 
-            
+            closeCamera();
         }
-        
+        handleModal();
     };
 
     const MAX_FILE_SIZE = 300 * 1024;
 
     const convertImageToBase64 = async (imageUri) => {
         try {
-            // Read the image file
-            const fileContent = await FileSystem.readAsStringAsync(imageUri, {
-                encoding: FileSystem.EncodingType.Base64,
-            });
+          // Read the image file
+          const fileContent = await FileSystem.readAsStringAsync(imageUri, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
 
-            const { width, height } = await ImageManipulator.manipulateAsync(
-                imageUri,
-                [],
-                { format: 'jpeg' }
-            );
+          const { width, height } = await ImageManipulator.manipulateAsync(
+            imageUri,
+            [],
+            { format: 'jpeg' } 
+          );
 
-            const scaleFactor = Math.min(1, MAX_FILE_SIZE / fileContent.length);
-            const newWidth = Math.floor(width * scaleFactor);
-            const newHeight = Math.floor(height * scaleFactor);
+          const scaleFactor = Math.min(1, MAX_FILE_SIZE / fileContent.length);
+          const newWidth = Math.floor(width * scaleFactor);
+          const newHeight = Math.floor(height * scaleFactor);
 
-            const resizedImage = await ImageManipulator.manipulateAsync(
-                imageUri,
-                [{ resize: { width: newWidth, height: newHeight } }],
-                { format: 'jpeg' }
-            );
+          const resizedImage = await ImageManipulator.manipulateAsync(
+            imageUri,
+            [{ resize: { width: newWidth, height: newHeight } }],
+            { format: 'jpeg' } 
+          );
 
-            const resizedFileContent = await FileSystem.readAsStringAsync(
-                resizedImage.uri,
-                {
-                    encoding: FileSystem.EncodingType.Base64,
-                }
-            );
+          const resizedFileContent = await FileSystem.readAsStringAsync(
+            resizedImage.uri,
+            {
+              encoding: FileSystem.EncodingType.Base64,
+            }
+          );
 
-            console.log(resizedFileContent);
-
-            return resizedFileContent;
+          console.log(resizedFileContent);
+    
+          return resizedFileContent;
         } catch (error) {
-            console.error('Error converting image to base64:', error);
+          console.error('Error converting image to base64:', error);
         }
-    };
+      };
 
     const handleSubmitButton = () => {
         setErrortext("");
@@ -317,7 +305,7 @@ const AddFdlKebisingan = () => {
         if (netInfo.isConnected && netInfo.isInternetReachable) {
             AsyncStorage.getItem("token").then((token) => {
                 setLoading(true);
-
+                
                 var dataToSend = {
                     no_sample: noSample,
                     token: token,
@@ -346,10 +334,11 @@ const AddFdlKebisingan = () => {
                         if (responseJson.message) {
                             setErrortext(responseJson.message);
                         } else {
+                            console.log(responseJson);
                             setPenamaanTitik(responseJson.keterangan)
                             setShowForm(true);
                             setCameraVisible(true);
-                            storeSate({ keterangan_4: responseJson.keterangan })
+                            storeSate({keterangan_4: responseJson.keterangan})
                         }
                     })
                     .catch((error) => {
@@ -397,10 +386,10 @@ const AddFdlKebisingan = () => {
             var time = ('0' + date.getHours()).slice(-2) + ':' + ('0' + date.getMinutes()).slice(-2)
             // const formattedTime = format(selectedDate, 'HH:mm', { locale: enUS });
             setJamPengambilan(time);
-
+      
             // Store the selected time
             storeSate({ waktu: time });
-        }
+          }
 
     };
 
@@ -452,25 +441,6 @@ const AddFdlKebisingan = () => {
         console.log('diclik', type)
     }
 
-    const openGallery = async () => {
-        try {
-            const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                quality: 1,
-            });
-
-            if (!result.canceled) {
-                if (result.assets && result.assets.length > 0) {
-                    const selectedAsset = result.assets[0];
-                    // Access the URI or other properties from the selected asset
-                    setImage(selectedAsset.uri);
-                }
-            }
-        } catch (error) {
-            console.error("Error picking an image", error);
-        }
-    };
-
     const getLocation = async () => {
         try {
             let { status } = await Location.requestForegroundPermissionsAsync();
@@ -490,15 +460,15 @@ const AddFdlKebisingan = () => {
 
             setLat(lat);
             setLongi(longi);
-            storeSate({ lat: lat });
-            storeSate({ longi: longi })
+            storeSate({lat: lat});
+            storeSate({longi: longi})
 
             const formattedCoordinates = formatCoordinates(
                 location.coords.latitude,
                 location.coords.longitude
             );
             setTitikKoordinatSampling(formattedCoordinates);
-            storeSate({ posisi: formatCoordinates })
+            storeSate({posisi: formatCoordinates})
         } catch (error) {
             console.error("Error getting location:", error);
             setErrorMsg("Error getting location");
@@ -592,7 +562,7 @@ const AddFdlKebisingan = () => {
                                     autoCapitalize="sentences"
                                     returnKeyType="next"
                                     blurOnSubmit={false}
-                                />
+/>
                             </View>
                             <View style={styles.SectionStyle}>
                                 <Text style={styles.textLabel}>Penamaan Tambahan</Text>
@@ -693,8 +663,10 @@ const AddFdlKebisingan = () => {
                                             style={styles.inputStyle}
                                             onChangeText={(JamPengambilan) => {
                                                 setJamPengambilan(JamPengambilan)
+                                                console.log(jamPengambilan)
                                                 storeSate({ jamPengambilan: JamPengambilan });
-                                            }}
+                                            }
+                                            }
                                             editable={false}
                                             value={jamPengambilan}
                                             underlineColorAndroid="#f000"
@@ -795,7 +767,7 @@ const AddFdlKebisingan = () => {
                                             var val = new Object();
                                             val.suhu_udara = SuhuUdara;
                                             storeSate(val)
-                                        }
+                                        } 
                                         }
                                         underlineColorAndroid="#f000"
                                         placeholder="Enter Suhu Udara"
@@ -1232,4 +1204,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default AddFdlKebisingan;
+export default AddFdlKebisinganBackup;

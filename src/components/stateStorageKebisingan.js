@@ -1,7 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState, useEffect } from "react";
+
 export default function stateStorageKebisingan(key) {
-    const [storage, setStorage] = useState(AsyncStorage.getItem('kebisingan'));
+    const [storage, setStorage] = useState({});
     useEffect(() => {
         AsyncStorage.getItem(key).then((value) => {
             let data = JSON.parse(value);

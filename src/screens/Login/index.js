@@ -92,7 +92,6 @@ const LoginScreen = ({ navigation }) => {
                                 console.log("an error");
                                 throw err;
                             }
-                            console.log("success");
                         }).catch((err)=> {
                             console.log("error is: " + err);
                         });

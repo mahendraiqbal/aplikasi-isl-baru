@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Alert, StyleSheet } from 'react-native';
 
 import {
@@ -6,20 +6,82 @@ import {
     DrawerItemList,
     DrawerItem,
 } from '@react-navigation/drawer';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 const CustomSidebarMenu = (props) => {
-    
+
+    const [accessData, setAccessData] = useState("");
+
+    useEffect(() => {
+        AsyncStorage.getItem('access').then((value) => {
+            var token = JSON.parse(value)
+            if (new Date() >= new Date(token.expired)) {
+                Alert.alert(
+                    'Token has been Expired.!',
+                    'Please Online to Re-Login',
+                    [
+                        {
+                            text: 'Ok',
+                            onPress: () => {
+                                AsyncStorage.removeItem('token');
+                                props.navigation.replace('Auth');
+                            },
+                        },
+                    ],
+                    { cancelable: false },
+                );
+            } else {
+                var dataToSend = {
+                    token: token.token,
+                };
+                let formBody = [];
+                for (let key in dataToSend) {
+                    let encodedKey = encodeURIComponent(key);
+                    let encodedValue = encodeURIComponent(dataToSend[key]);
+                    formBody.push(encodedKey + "=" + encodedValue);
+                }
+
+                formBody = formBody.join("&");
+
+                fetch(
+                    "https://apps.intilab.com/eng/backend/public/default/api/cektoken",
+                    {
+                        method: "POST",
+                        body: JSON.stringify(dataToSend),
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    }
+                )
+                    .then((response) => response.json())
+                    .then((responseJson) => {
+                        console.log(responseJson)
+                        if (responseJson.status != 200) {
+                            // console.log(responseJson.message);
+                        } else {
+                            setAccessData(responseJson.name);
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                        Alert.alert(error);
+                    });
+            }
+        });
+    }, [])
+
+    this.nama = accessData;
+
     return (
         <View style={stylesSidebar.sideMenuContainer}>
             <View style={stylesSidebar.profileHeader}>
                 <View style={stylesSidebar.profileHeaderPicCircle}>
                     <Text style={{ fontSize: 25, color: '#307ecc' }}>
-                        {'N'.charAt(0)}
+                        {accessData.charAt(0)}
                     </Text>
                 </View>
                 <Text style={stylesSidebar.profileHeaderText}>
-                    Nama User
+                    {accessData}
                 </Text>
             </View>
             <View style={stylesSidebar.profileHeaderLine} />
@@ -28,7 +90,7 @@ const CustomSidebarMenu = (props) => {
                 <DrawerItemList {...props} />
                 <DrawerItem
                     label={({ color }) =>
-                        <Text style={{ color: '#d8d8d8' }}>
+                        <Text style={{ color: '#fff', fontSize: 18 }}>
                             Logout
                         </Text>
                     }
