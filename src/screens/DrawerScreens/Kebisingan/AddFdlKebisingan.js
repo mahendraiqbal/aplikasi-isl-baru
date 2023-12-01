@@ -100,6 +100,10 @@ const AddFdlKebisingan = ({ navigation }) => {
   const kategoriPengujianRef = useRef();
 
   useEffect(() => {
+    loadDataFromStorage();
+  }, []);
+
+  useEffect(() => {
     AsyncStorage.getItem("access").then((value) => {
       var token = JSON.parse(value);
       if (new Date() >= new Date(token.expired)) {
@@ -412,35 +416,92 @@ const AddFdlKebisingan = ({ navigation }) => {
     }
   };
 
+  //   const handleSaveButton = async () => {
+  //     try {
+  //       // Retrieve the existing form data array from AsyncStorage
+  //       const storedData = await AsyncStorage.getItem("kebisingan");
+
+  //       // Initialize formDataArray as an array or an empty array if storedData is not an array
+  //       let formDataArray = Array.isArray(storedData) ? storedData : [];
+
+  //       // Add the new form data to the array
+  //       const newFormData = { field: inputValue };
+  //       formDataArray.push(newFormData);
+
+  //       // Save the updated array back to AsyncStorage
+  //       await AsyncStorage.setItem("kebisingan", JSON.stringify(formDataArray));
+
+  //       // Reset the input field
+  //       setInputValue("");
+
+  //       // Log success or perform navigation
+  //       console.log("Form data saved successfully");
+  //       console.log('check', formDataArray);
+  //     } catch (error) {
+  //       console.error("Error saving form data", error);
+  //     }
+  //   };
+
+  // Function to load data from AsyncStorage
+  const loadDataFromStorage = async () => {
+    const existingData = await AsyncStorage.getItem("formData");
+    const formDataArray = existingData ? JSON.parse(existingData) : [];
+    console.log(formDataArray);
+    // Do something with the loaded data
+  };
+
   const handleSaveButton = async () => {
-    try {
-      // Retrieve the existing form data array from AsyncStorage
-      const storedData = await AsyncStorage.getItem("kebisingan");
+    // Fetch existing data from AsyncStorage
+    const existingData = await AsyncStorage.getItem("formData");
+    const formDataArray = existingData ? JSON.parse(existingData) : [];
   
-      // Initialize formDataArray as an array or an empty array if storedData is not an array
-      let formDataArray = Array.isArray(storedData) ? storedData : [];
+    // Create a new data object
+    const newData = {
+      keterangan_4: penamaanTitik,
+      penamaanTambahan: penamaanTambahan,
+      sumber_keb: sumberKebisingan,
+      jen_fre: jenisFrekuensi,
+      jenisPengujian: jenisPengujian,
+      jenis_durasi: kategoriPengujian,
+      posisi: titikKoordinatSampling,
+      waktu: jamPengambilan,
+      kategoriPengujian: kategoriPengujian,
+      suhu_udara: suhuUdara,
+      kelembapan_udara: kelembapanUdara,
+    };
   
-      // Add the new form data to the array
-      const newFormData = { field: inputValue };
-      formDataArray.push(newFormData);
+    // Add the new data object to the array
+    formDataArray.push(newData);
   
-      // Save the updated array back to AsyncStorage
-      await AsyncStorage.setItem("kebisingan", JSON.stringify(formDataArray));
+    // Save the updated array back to AsyncStorage
+    await AsyncStorage.setItem("formData", JSON.stringify(formDataArray));
   
-      // Reset the input field
-      setInputValue("");
+    // Optionally, you can reset the form fields here
+    setPenamaanTitik("");
+    setPenamaanTambahan("");
+    setSumberKebisingan("");
+    setJamPengambilan("");
+    setJenisFrekuensi("");
+    setJenisPengujian("");
+    setKategoriPengujian("");
+    setKelembapanUdara("");
+    setLat("");
+    setLongi("");
+    setShiftPengambilan("");
+    setSuhuUdara("");
+    setKelembapanUdara("");
+
+    console.log("Updated formDataArray:", formDataArray);
+
   
-      // Log success or perform navigation
-      console.log("Form data saved successfully");
-      console.log('check', formDataArray);
-    } catch (error) {
-      console.error("Error saving form data", error);
-    }
+    setShowForm(false);
+    // You can also do any other necessary actions after saving
+    // ...
   };
   
 
   const handleCancelButton = () => {
-    setShowForm(false);
+    setShowForm(true);
     setImage(null);
     setImageLain(null);
     setCameraVisible(false);
@@ -458,7 +519,8 @@ const AddFdlKebisingan = ({ navigation }) => {
     setShiftPengambilan("");
     setSuhuUdara("");
     setKelembapanUdara("");
-    // Add any other logic you need for cancel
+    setSumberKebisingan("");
+    setTitikKoordinatSampling("");
   };
 
   const handleModalOption = async (confirmed) => {
@@ -469,6 +531,7 @@ const AddFdlKebisingan = ({ navigation }) => {
       // User selected "Ya"
       // Remove AsyncStorage data
       await AsyncStorage.removeItem("kebisingan");
+      await AsyncStorage.removeItem("formData");
       setShowForm(false);
 
       // Optional: Navigate to a different page
@@ -987,6 +1050,17 @@ const AddFdlKebisingan = ({ navigation }) => {
                         style={styles.imageRender}
                       />
                     )}
+                    {/* {image ? (
+                      <Image
+                        source={{ uri: image }}
+                        style={styles.imageRender}
+                      />
+                    ) : (
+                      <Image
+                        source={imageLain} // Replace with your default image path
+                        style={styles.imageRender}
+                      />
+                    )} */}
                   </View>
                   <View style={styles.SectionStyleRow}>
                     {imageLain && (
@@ -995,6 +1069,17 @@ const AddFdlKebisingan = ({ navigation }) => {
                         style={styles.imageRender}
                       />
                     )}
+                    {/* {image ? (
+                      <Image
+                        source={{ uri: image }}
+                        style={styles.imageRender}
+                      />
+                    ) : (
+                      <Image
+                        source={imageLain} // Replace with your default image path
+                        style={styles.imageRender}
+                      />
+                    )} */}
                   </View>
                 </View>
 
