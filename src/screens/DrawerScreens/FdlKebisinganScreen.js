@@ -82,7 +82,7 @@ const FdlKebisinganScreen = ({ state, navigation }) => {
                 options={{
                     tabBarIcon: ({ focused }) => {
                         if (focused) {
-                            console.log('ini add kebisngan')
+                            // console.log('ini add kebisngan')
                             let value = this.stateForm;
                         }
                         return (
@@ -110,7 +110,7 @@ const FdlKebisinganScreen = ({ state, navigation }) => {
                 options={{
                     tabBarIcon: ({ focused }) => {
                         if (focused) {
-                            console.log('ini data kebisngan')
+                            // console.log('ini data kebisngan')
                             let value = this.stateForm;
                         }
                         return (

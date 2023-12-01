@@ -211,6 +211,7 @@ import {
     Alert
 } from "react-native";
 import Loader from "../../../components/Loader";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HomeFdlKebisingan = ({navigation}) => {
     
@@ -219,6 +220,7 @@ const HomeFdlKebisingan = ({navigation}) => {
     const [errorMsg, setErrorMsg] = useState(null);
     const [loading, setLoading] = useState(false);
     const [errortext, setErrortext] = useState("");
+    const [jumlahData, setJumlahData] = useState(0);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -244,6 +246,25 @@ const HomeFdlKebisingan = ({navigation}) => {
 
     useEffect(() => { });
 
+    useEffect(() => {
+        const fetchData = async () => {
+          try {
+            const formDataString = await AsyncStorage.getItem('formData');
+            if (formDataString) {
+              const formDataArray = JSON.parse(formDataString);
+              const count = formDataArray.length;
+              setJumlahData(count);
+            } else {
+              setJumlahData(0);
+            }
+          } catch (error) {
+            console.error('Error retrieving data from AsyncStorage:', error);
+          }
+        };
+    
+        fetchData();
+      }, []);
+
     return (
         <View style={styles.root}>
             <Loader loading={loading} />
@@ -255,7 +276,7 @@ const HomeFdlKebisingan = ({navigation}) => {
                     <View style={styles.allData}>
                         <View style={{ alignItems: "center", justifyContent: "center" }}>
                             <TouchableOpacity style={styles.buttonOffline}>
-                                <Text style={{ fontSize: 20, fontWeight: "bold", color: '#fff' }}>0</Text>
+                                <Text style={{ fontSize: 20, fontWeight: "bold", color: '#fff' }}>{jumlahData}</Text>
                             </TouchableOpacity>
                             <Text style={styles.buttonText}>Data Offline</Text>
                         </View>
