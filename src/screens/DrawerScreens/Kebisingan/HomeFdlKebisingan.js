@@ -208,26 +208,28 @@ import {
     SafeAreaView,
     StyleSheet,
     Image,
-    Alert
+    Alert,
+    FlatList,
+    RefreshControl
 } from "react-native";
 import Loader from "../../../components/Loader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const HomeFdlKebisingan = ({navigation}) => {
-    
+const HomeFdlKebisingan = ({ navigation }) => {
     const [timeNow, setTimeNow] = useState(new Date());
     const [accessData, setAccessData] = useState("");
     const [errorMsg, setErrorMsg] = useState(null);
     const [loading, setLoading] = useState(false);
     const [errortext, setErrortext] = useState("");
     const [jumlahData, setJumlahData] = useState(0);
+    const [refreshing, setRefreshing] = useState(false);
 
     useEffect(() => {
         const interval = setInterval(() => {
             setTimeNow(new Date());
         }, 1000);
 
-        setAccessData(this.nama)
+        setAccessData(this.nama);
 
         return () => clearInterval(interval);
     }, []);
@@ -246,49 +248,58 @@ const HomeFdlKebisingan = ({navigation}) => {
 
     useEffect(() => { });
 
-    useEffect(() => {
-        const fetchData = async () => {
-          try {
+    const fetchData = async () => {
+        try {
             const formDataString = await AsyncStorage.getItem('formData');
             if (formDataString) {
-              const formDataArray = JSON.parse(formDataString);
-              const count = formDataArray.length;
-              setJumlahData(count);
+                const formDataArray = JSON.parse(formDataString);
+                const count = formDataArray.length;
+                setJumlahData(count);
             } else {
-              setJumlahData(0);
+                setJumlahData(0);
             }
-          } catch (error) {
+        } catch (error) {
             console.error('Error retrieving data from AsyncStorage:', error);
-          }
-        };
-    
+        } finally {
+            setRefreshing(false);
+        }
+    };
+
+    const onRefresh = () => {
+        setRefreshing(true);
         fetchData();
-      }, []);
+    };
 
     return (
         <View style={styles.root}>
             <Loader loading={loading} />
             <View style={styles.container}>
-                {/* zIndex: 0 */}
-                <View style={styles.sheet} >
-                    <Text style={styles.greetingText}>{greeting}</Text>
-                    <Text style={[styles.userNameText, { borderBottomWidth: 1, borderBottomColor: "rgb(48, 126, 204)" }]}>{`${accessData}`}</Text>
-                    <View style={styles.allData}>
-                        <View style={{ alignItems: "center", justifyContent: "center" }}>
-                            <TouchableOpacity style={styles.buttonOffline}>
-                                <Text style={{ fontSize: 20, fontWeight: "bold", color: '#fff' }}>{jumlahData}</Text>
-                            </TouchableOpacity>
-                            <Text style={styles.buttonText}>Data Offline</Text>
+                <FlatList
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    }
+                    data={[{ key: 'data' }]}
+                    renderItem={({ item }) => (
+                        <View style={styles.sheet} >
+                            <Text style={styles.greetingText}>{greeting}</Text>
+                            <Text style={[styles.userNameText, { borderBottomWidth: 1, borderBottomColor: "rgb(48, 126, 204)" }]}>{`${accessData}`}</Text>
+                            <View style={styles.allData}>
+                                <View style={{ alignItems: "center", justifyContent: "center" }}>
+                                    <TouchableOpacity style={styles.buttonOffline}>
+                                        <Text style={{ fontSize: 20, fontWeight: "bold", color: '#fff' }}>{jumlahData}</Text>
+                                    </TouchableOpacity>
+                                    <Text style={styles.buttonText}>Data Offline</Text>
+                                </View>
+                                <View style={{ alignItems: "center", justifyContent: "center" }}>
+                                    <TouchableOpacity style={styles.button}>
+                                        <Text style={{ fontSize: 20, fontWeight: "bold", color: '#fff' }}>0</Text>
+                                    </TouchableOpacity>
+                                    <Text style={styles.buttonText}>Data Error</Text>
+                                </View>
+                            </View>
                         </View>
-                        <View style={{ alignItems: "center", justifyContent: "center" }}>
-                            <TouchableOpacity style={styles.button}>
-                                <Text style={{ fontSize: 20, fontWeight: "bold", color: '#fff' }}>0</Text>
-                            </TouchableOpacity>
-                            <Text style={styles.buttonText}>Data Error</Text>
-                        </View>
-                    </View>
-
-                </View>
+                    )}
+                />
             </View>
         </View>
     );
@@ -323,8 +334,6 @@ const styles = StyleSheet.create({
         width: '100%',
         borderRadius: 15,
         padding: 10
-        // flexDirection: "row",
-        // justifyContent: "space-around"
     },
 
     greetingText: {
@@ -342,7 +351,7 @@ const styles = StyleSheet.create({
     button: {
         backgroundColor: '#FF396F',
         borderWidth: 1,
-        borderColor: "#FF396F", // You can set the border color to your preference
+        borderColor: "#FF396F",
         borderRadius: 15,
         padding: 8,
         alignItems: "center",
@@ -354,7 +363,7 @@ const styles = StyleSheet.create({
     buttonOffline: {
         backgroundColor: '#00B4FF',
         borderWidth: 1,
-        borderColor: "#00B4FF", // You can set the border color to your preference
+        borderColor: "#00B4FF",
         borderRadius: 15,
         padding: 8,
         alignItems: "center",
@@ -365,12 +374,12 @@ const styles = StyleSheet.create({
 
     buttonText: {
         fontSize: 14,
-        color: "black", // You can set the text color to your preference
+        color: "black",
         textAlign: "center"
     },
     icon: {
-        width: 50, // Set your desired icon width
-        height: 50, // Set your desired icon height
+        width: 50,
+        height: 50,
     },
 });
 

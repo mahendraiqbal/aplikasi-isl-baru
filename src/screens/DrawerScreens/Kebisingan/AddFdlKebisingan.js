@@ -28,6 +28,7 @@ import * as FileSystem from "expo-file-system";
 import * as ImageManipulator from "expo-image-manipulator";
 import { Icon, IconButton, MD3Colors } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
+// import * as RNFS from "react-native-fs";
 
 const AddFdlKebisingan = ({ navigation }) => {
   // console.log(navigation.getState)
@@ -454,7 +455,7 @@ const AddFdlKebisingan = ({ navigation }) => {
     // Fetch existing data from AsyncStorage
     const existingData = await AsyncStorage.getItem("formData");
     const formDataArray = existingData ? JSON.parse(existingData) : [];
-  
+
     // Create a new data object
     const newData = {
       keterangan_4: penamaanTitik,
@@ -469,13 +470,13 @@ const AddFdlKebisingan = ({ navigation }) => {
       suhu_udara: suhuUdara,
       kelembapan_udara: kelembapanUdara,
     };
-  
+
     // Add the new data object to the array
     formDataArray.push(newData);
-  
+
     // Save the updated array back to AsyncStorage
     await AsyncStorage.setItem("formData", JSON.stringify(formDataArray));
-  
+
     // Optionally, you can reset the form fields here
     setPenamaanTitik("");
     setPenamaanTambahan("");
@@ -493,12 +494,53 @@ const AddFdlKebisingan = ({ navigation }) => {
 
     console.log("Updated formDataArray:", formDataArray);
 
-  
     setShowForm(false);
-    // You can also do any other necessary actions after saving
-    // ...
   };
-  
+
+//   const saveDataToDevice = async () => {
+//     try {
+//       // Fetch existing data from AsyncStorage
+//       const existingData = await AsyncStorage.getItem("formData");
+//       const existingFormDataArray = existingData ? JSON.parse(existingData) : [];
+
+//       // Create a new data object
+//       const newData = {
+//         // ... your form data properties
+//       };
+
+//       // Add the new data object to the array
+//       existingFormDataArray.push(newData);
+
+//       // Save the updated array back to AsyncStorage
+//       await AsyncStorage.setItem("formData", JSON.stringify(existingFormDataArray));
+
+//       // Optionally, you can reset the form fields here
+//       // ... reset your form fields
+
+//       // Save to file using expo-file-system
+//       const fileUri = `${FileSystem.documentDirectory}formData.txt`;
+//       await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(existingFormDataArray), { encoding: FileSystem.EncodingType.UTF8 });
+
+//       console.log("Updated formDataArray:", existingFormDataArray);
+//       console.log("Form data saved to file:", fileUri);
+//     } catch (error) {
+//       console.error("Error saving form data:", error);
+//     }
+//   };
+
+//   const saveDataToDevice = async () => {
+//     try {
+//       const formDataString = JSON.stringify(dataArray);
+//       const filePath = `${FileSystem.documentDirectory}formData.txt`;
+
+//       await FileSystem.writeAsStringAsync(filePath, formDataString, {
+//         encoding: FileSystem.EncodingType.UTF8,
+//       });
+//       console.log("Data saved to device:", filePath);
+//     } catch (error) {
+//       console.error("Error saving data to device:", error);
+//     }
+//   };
 
   const handleCancelButton = () => {
     setShowForm(true);
@@ -1155,6 +1197,9 @@ const AddFdlKebisingan = ({ navigation }) => {
                       <Text style={styles.buttonTextStyle}>SAVE</Text>
                     </TouchableOpacity>
                   </View>
+                  {/* <TouchableOpacity onPress={saveDataToDevice}>
+        <Text>Save to Device</Text>
+      </TouchableOpacity> */}
                 </View>
               </>
             )}
